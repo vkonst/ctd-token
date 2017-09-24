@@ -11,16 +11,17 @@
   },
   "repository": {
     "type": "git",
-    "url": ""
+    "url": " https://konstantinovv@bitbucket.org/konstantinovv/umu-ico.git"
   },
   "keywords": [
     "ICO",
-    "smartcontrct",
-    "ethereum"
+    "smartcontract",
+    "ethereum",
+    "ERC20"
   ],
   "author": "{name: Vadim Konstantinov, email:vadim.konstantinov@gmail.com}",
   "license": "",
-  "homepage": "https://bitbucket.org/vkonst/umum-ico#readme",
+  "homepage": "https://bitbucket.org/konstantinovv/umu-ico",
   "devDependencies": {
     "bignumber.js": "^4.0.4"
   }

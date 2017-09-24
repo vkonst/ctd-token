@@ -1,0 +1,27 @@
+{
+  "private": true,
+  "name": "umum-ico",
+  "version": "0.0.0",
+  "description": "Smart contracts for Umum ICO",
+  "main": "bin/app.js",
+  "scripts": {
+    "compile": "truffle compile",
+    "test": "truffle test",
+    "deploy": "truffle migrate"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "ICO",
+    "smartcontrct",
+    "ethereum"
+  ],
+  "author": "{name: Vadim Konstantinov, email:vadim.konstantinov@gmail.com}",
+  "license": "",
+  "homepage": "https://bitbucket.org/vkonst/umum-ico#readme",
+  "devDependencies": {
+    "bignumber.js": "^4.0.4"
+  }
+}

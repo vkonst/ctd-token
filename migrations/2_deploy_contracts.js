@@ -5,10 +5,9 @@ module.exports = function(deployer) {
   const unixTimeNow = parseInt(new Date() / 1000);
 
   const threeMinutes = 180;
-  const openingTime = unixTimeNow + threeMinutes;
-  const shiftTime = openingTime + threeMinutes;
-  const closingTime = shiftTime + threeMinutes;
-  const freezePeriod = threeMinutes;
+  const preIcoOpeningTime = unixTimeNow + threeMinutes;
+  const icoOpeningTime = preIcoOpeningTime + threeMinutes;
+  const closingTime = icoOpeningTime + threeMinutes;
 
-  deployer.deploy(UmuToken, openingTime, shiftTime, closingTime, freezePeriod);
+  deployer.deploy(UmuToken, preIcoOpeningTime, icoOpeningTime, closingTime);
 };

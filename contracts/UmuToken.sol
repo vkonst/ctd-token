@@ -10,6 +10,7 @@ contract UmuToken is StandardToken, Ownable {
 
   event NewTokens(address indexed to, uint256 amount);  // FIXME: consider if 'to' shall be indexed
   event Opened();
+  event Bonused();
   event Shifted();
   event Closed(uint64 time);
   event Released();
@@ -25,6 +26,8 @@ contract UmuToken is StandardToken, Ownable {
   uint32 internal constant RATE = 1000;
   // Phase One premium rate
   uint32 internal constant PREMIUM_RATE = 1150;
+  // Phase Bonus: bonus rate
+  uint32 internal constant BONUS_RATE = 1100;
 
   // seconds since unix epoch when the Phase One gets started
   uint64 internal openingTime;
@@ -36,6 +39,7 @@ contract UmuToken is StandardToken, Ownable {
   uint64 internal freezePeriod;
 
   bool internal phaseOne = false;
+  bool internal phaseBonus = false;
   bool internal phaseTwo = false;
   bool internal closed = false;
   bool internal frozen = true;
@@ -69,6 +73,10 @@ contract UmuToken is StandardToken, Ownable {
     require(now >= shiftTime);
 
     phaseOne = false;
+    // TODO: if ( now < shiftTime )
+    //         phaseBonus = true;
+    //         Bonused();
+    //       else
     phaseTwo = true;
     Shifted();
     // FIXME: shall the msg.sender be awarded with some bounty tokens?
@@ -143,12 +151,17 @@ contract UmuToken is StandardToken, Ownable {
   }
 
   modifier whenPhaseOne() {
-    require(phaseOne && !phaseTwo);
+    require(phaseOne && !phaseBonus && !phaseTwo);
+    _;
+  }
+
+  modifier whenPhaseBonus() {
+    require(phaseBonus && !phaseOne && !phaseTwo);
     _;
   }
 
   modifier whenPhaseTwo() {
-    require(phaseTwo && !phaseOne);
+    require(phaseTwo && !phaseOne && !phaseBonus);
     _;
   }
 

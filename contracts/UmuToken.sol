@@ -11,28 +11,28 @@ contract UmuToken is StandardToken, Ownable {
 
     string public constant name = "UMU Token";
     string public constant symbol = "UMU";
-    // 1 UMU = 1x10^decimals Atom(s)
+    /** Number of "Atom" in 1 UMU (1 UMU = 1x10^decimals Atom) */
     uint8  public constant decimals = 18;
 
-    // Holder of bounty tokens
+    /** Holder of bounty tokens */
     address public bounty;
 
     mapping (address => uint) pendingWithdrawals;
 
-    // Limit on Atom(s) issued, inclusive owner's and bounty shares
+    /** Limit (in Atom) issued, inclusive owner's and bounty shares */
     uint256 constant internal TOTAL_LIMIT = 496000000 * (10 ** uint256(decimals));
-    // ... of which, limit for pre-ICO Phase A
+    /** Limit (in Atom) for Pre-ICO Phases A, incl. owner's and bounty shares */
     uint256 constant internal PRE_ICO_LIMIT = 99200000 * (10 ** uint256(decimals));
 
     /**
-   * ICO Phases.
-   *
-   * - PreStart: tokens are not yet sold/issued
-   * - PreIcoA:  new tokens sold/issued at the premium price
-   * - PreIcoB:  new tokens sold/issued at the discounted price
-   * - MainIco   new tokens sold/issued at the regular price
-   * - AfterIco: new tokens can not be not be sold/issued any longer
-   */
+    * ICO Phases.
+    *
+    * - PreStart: tokens are not yet sold/issued
+    * - PreIcoA:  new tokens sold/issued at the premium price
+    * - PreIcoB:  new tokens sold/issued at the discounted price
+    * - MainIco   new tokens sold/issued at the regular price
+    * - AfterIco: new tokens can not be not be sold/issued any longer
+    */
     enum Phases {PreStart, PreIcoA, PreIcoB, MainIco, AfterIco}
 
     // Main ICO rate in UMU(s) per 1 ETH:
@@ -48,7 +48,7 @@ contract UmuToken is StandardToken, Ownable {
     uint32 constant internal TO_OWNER_RATE_B  =  220;
     uint32 constant internal TO_BOUNTY_RATE_B =   44;
 
-    // Award in Wei(s) to a successful initiator of a phase shift
+    // Award in Wei(s) to a successful initiator of a Phase shift
     uint256 constant internal PRE_OPENING_AWARD = 100 * (10 ** uint256(15));
     uint256 constant internal ICO_OPENING_AWARD = 200 * (10 ** uint256(15));
     uint256 constant internal ICO_CLOSING_AWARD = 500 * (10 ** uint256(15));
@@ -68,23 +68,37 @@ contract UmuToken is StandardToken, Ownable {
         uint32 total;
     }
 
+    struct Adjustments {
+        Phases newPhase;
+        uint256 shiftAward;
+        uint256 overSoldTokens;
+    }
+
     event NewTokens(uint256 amount);
     event Shifted(Phases phase);
 
-    Phases internal phase;                // current Phase
+    // current Phase
+    Phases internal phase = Phases.PreStart;
 
-    // Timestamps in seconds since Unix epoch:
-    uint64 internal preIcoOpeningTime;    // when Pre-ICO Phase A starts
-    uint64 internal icoOpeningTime;       // when Main ICO starts (if not sold out before)
-    uint64 internal closingTime;          // by when the ICO campaign finishes in any way
+    // Timestamps limiting duration of Phases, in seconds since Unix epoch.
+    // Leave at least 900 (seconds) between the stamps.
+    //
+    uint64 internal preIcoOpeningTime;  // when Pre-ICO Phase A starts
+    uint64 internal icoOpeningTime;     // when Main ICO starts (if not sold out before)
+    uint64 internal closingTime;        // by when the ICO campaign finishes in any way
 
-    // msg.value MUST be at least the sum of AWARD(s)
+
     function UmuToken(
         uint64 _preIcoOpeningTime,
         uint64 _icoOpeningTime,
         uint64 _closingTime
+        // msg.value MUST be at least the sum of AWARD(s)
     ) onlyOwner
     {
+        require(_preIcoOpeningTime > now);
+        require(_icoOpeningTime >= preIcoOpeningTime);
+        require(_closingTime > icoOpeningTime);
+
         owner = msg.sender;
         preIcoOpeningTime = _preIcoOpeningTime;
         icoOpeningTime = _icoOpeningTime;
@@ -98,58 +112,96 @@ contract UmuToken is StandardToken, Ownable {
     }
 
     function setBounty(address _bounty) onlyOwner whenNotOpened returns (bool) {
+
         require(_bounty != address(0));
         bounty = _bounty;
         return true;
     }
 
     function create() payable whenIcoActive public returns (bool) {
+
         require(msg.value > 0);
 
-        uint256 weis = msg.value;
-        Phases expectedPhase = phase;
+        Phases oldPhase = phase;
+        uint256 adjustedValue = msg.value;
+        uint256 overPaidValue = 0;
 
-        uint256 extraWeis = 0;
-        uint256 extraTokens = 0;
-        uint256 shiftAward = 0;
-
+        Adjustments memory adjusted = adjustBasedOnTime();
         Rates memory rates = getRates();
-        Tokens memory tokens = getTokens(msg.value, rates);
+        Tokens memory tokens = computeTokens(msg.value, rates);
+        adjusted = adjustBasedOnQty(tokens.newTotalSupply, adjusted);
 
-        if (tokens.newTotalSupply >= TOTAL_LIMIT) {
-            extraTokens = tokens.newTotalSupply.sub(TOTAL_LIMIT);
-            expectedPhase = Phases.AfterIco;
-            shiftAward = ICO_CLOSING_AWARD;
-
-        } else if ((phase == Phases.PreIcoA) && (tokens.newTotalSupply >= PRE_ICO_LIMIT)) {
-            extraTokens = tokens.newTotalSupply.sub(PRE_ICO_LIMIT);
-            expectedPhase = (now >= icoOpeningTime) ? Phases.PreIcoB : Phases.AfterIco;
-            shiftAward = (now >= icoOpeningTime) ? ICO_OPENING_AWARD : ICO_CLOSING_AWARD;
+        if (adjusted.overSoldTokens > 0) {
+            overPaidValue = adjusted.overSoldTokens.div(rates.total);
+            adjustedValue = msg.value.sub(overPaidValue);
+            tokens = computeTokens(adjustedValue, rates);
         }
 
-        if (extraTokens > 0) {
-            extraWeis = extraTokens.div(rates.total);
-            weis = msg.value.sub(extraWeis);
-            tokens = getTokens(weis, rates);
-        }
-
+        // new tokens "emission"
         totalSupply = tokens.newTotalSupply;
         balances[msg.sender] = balances[msg.sender].add(tokens.forSender);
         balances[owner] = balances[owner].add(tokens.forOwner);
         balances[bounty] = balances[bounty].add(tokens.forBounty);
 
-        if (extraWeis > 0) {
-            pendingWithdrawals[msg.sender] = pendingWithdrawals[msg.sender].add(extraWeis);
+        // ETH transfers
+        if (overPaidValue > 0) {
+            pendingWithdrawals[msg.sender] = pendingWithdrawals[msg.sender].add(overPaidValue);
+            owner.transfer(adjustedValue);
+        } else {
+            owner.transfer(msg.value);
         }
-        owner.transfer(weis);
+
+        // Event emitting
         NewTokens(tokens.total);
-        if (expectedPhase != phase) {
-            shiftTo(expectedPhase, shiftAward);
+        if (adjusted.newPhase != oldPhase) {
+            shiftTo(adjusted.newPhase, adjusted.shiftAward);
         }
+
         return true;
     }
 
-    function getTokens(uint256 weis, Rates rates) internal returns (Tokens tokens) {
+    function adjustBasedOnTime() internal returns (Adjustments adjusted) {
+
+        adjusted.shiftAward = 0;
+        adjusted.overSoldTokens = 0;
+
+        if ((now >= closingTime) && (phase != Phases.AfterIco)) {
+            phase = Phases.AfterIco;
+            adjusted.shiftAward = ICO_CLOSING_AWARD;
+
+        } else if ((now >= icoOpeningTime) &&
+        ((phase == Phases.PreIcoA) || (phase == Phases.PreIcoB))) {
+            phase = Phases.MainIco;
+            adjusted.shiftAward = ICO_OPENING_AWARD;
+
+        } else if ((now >= preIcoOpeningTime) && (phase == Phases.PreStart)) {
+            phase = Phases.PreIcoA;
+            adjusted.shiftAward = PRE_OPENING_AWARD;
+        }
+
+        adjusted.newPhase = phase;
+        return adjusted;
+    }
+
+    function adjustBasedOnQty(uint256 newTotalSupply, Adjustments adjusted) internal returns (Adjustments) {
+
+        if (newTotalSupply >= TOTAL_LIMIT) {
+            adjusted.overSoldTokens = newTotalSupply.sub(TOTAL_LIMIT);
+            adjusted.newPhase = Phases.AfterIco;
+            adjusted.shiftAward = ICO_CLOSING_AWARD;
+
+        } else if ((phase == Phases.PreIcoA) && (newTotalSupply >= PRE_ICO_LIMIT)) {
+            adjusted.overSoldTokens = newTotalSupply.sub(PRE_ICO_LIMIT);
+            adjusted.newPhase = (now >= icoOpeningTime) ? Phases.PreIcoB : Phases.AfterIco;
+            adjusted.shiftAward = (now >= icoOpeningTime) ? ICO_OPENING_AWARD : ICO_CLOSING_AWARD;
+        }
+
+        return adjusted;
+    }
+
+
+    function computeTokens(uint256 weis, Rates rates) internal returns (Tokens tokens) {
+
         tokens.forSender = weis.mul(uint256(rates.toSender));
         tokens.forOwner = weis.mul(uint256(rates.toOwner));
         tokens.forBounty = weis.mul(uint256(rates.toBounty));
@@ -159,6 +211,7 @@ contract UmuToken is StandardToken, Ownable {
     }
 
     function getRates() internal returns (Rates rates) {
+
         if (phase == Phases.PreIcoA) {
             rates.toSender = TO_SENDER_RATE_A;
             rates.toOwner = TO_OWNER_RATE_A;
@@ -178,23 +231,6 @@ contract UmuToken is StandardToken, Ownable {
         return rates;
     }
 
-    function openPreIco() whenNotOpened public returns (bool) {
-        require(now >= preIcoOpeningTime);
-        shiftTo(Phases.PreIcoA, ICO_OPENING_AWARD);
-        return true;
-    }
-
-    function openMainIco() whenPreIco public returns (bool) {
-        require((now >= icoOpeningTime) && (totalSupply < TOTAL_LIMIT));
-        shiftTo(Phases.MainIco, ICO_OPENING_AWARD);
-        return true;
-    }
-
-    function closeIco() whenIcoActive public returns (bool) {
-        require((now >= closingTime) || (totalSupply >= TOTAL_LIMIT));
-        shiftTo(Phases.AfterIco, ICO_CLOSING_AWARD);
-        return true;
-    }
 
     function shiftTo(Phases _phase, uint256 award) internal {
         phase = _phase;
@@ -204,6 +240,8 @@ contract UmuToken is StandardToken, Ownable {
 
     function withdraw() public returns (bool) {
         uint amount = pendingWithdrawals[msg.sender];
+        require(amount > 0);
+
         pendingWithdrawals[msg.sender] = 0;
         msg.sender.transfer(amount);
         return true;

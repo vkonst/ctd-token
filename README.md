@@ -3,8 +3,8 @@
 ERC20 tokens extended with the following features:<br/>
 - Number of tokens to issue(sell) is limited (hard-coded) but not pre-fixed<br/>
 - On top of tokens to buyers (investors) the "company" and "bounty" tokens issued <br />
- `Tokens issed to the contract owner address and the bounty program address.` <br /> 
-- ICO "phases" (time periods) are fixed at deployment):<br/>
+ `Tokens issed at fixed rate to the contract owner and the bounty program addresses.` <br /> 
+- ICO "phases" (opening/closing dates) are fixed at deployment:<br/>
   - _Pre-Funding_: `The contract deployed but sale is not yet allowed/started.`<br/>
   - _Pre-ICO Phase A_: `Tokens are selling at the premium price.` <br />
   `Limited by the number of tokens for sale and the (main) ICO start date.`<br/>
@@ -14,11 +14,12 @@ ERC20 tokens extended with the following features:<br/>
   `as well as by the (main) ICO start date.` <br />
   - _(Main) ICO_: `Tokens are on sale at the regular price.`<br/>
   - After ICO_: `No new tokens are on sale.` <br/ >
+- Company tokens may not be transferred before 'After ICO' phase. <br/>
 - Anyone may trigger phase change (at specified time, considering limits)<br/>
 - Award(s) is paid in ETH to inintiator(s) of the shift(s)<br/>
 - Pre-ICO and ICO will close if tokens are sold out<br/>
 - Events (logs) generated for/on:<br/>
-  - ``<br/>
+  - `New Phase started`<br/>
   - `New tokens issued (generated)`<br/>
   - `Allowance on transer of tokens issued`<br/>
   - `Tokens transferred`<br/>

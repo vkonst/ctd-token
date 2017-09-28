@@ -111,7 +111,7 @@ contract UmuToken is StandardToken, Ownable {
         // FIXME: check gas limit
     }
 
-    function setBounty(address _bounty) onlyOwner whenNotOpened returns (bool) {
+    function setBounty(address _bounty) public onlyOwner whenNotOpened returns (bool) {
 
         require(_bounty != address(0));
         bounty = _bounty;
@@ -160,6 +160,19 @@ contract UmuToken is StandardToken, Ownable {
         return true;
     }
 
+    function withdraw() public returns (bool) {
+        uint amount = pendingWithdrawals[msg.sender];
+        require(amount > 0);
+
+        pendingWithdrawals[msg.sender] = 0;
+        msg.sender.transfer(amount);
+        return true;
+    }
+
+    function returnWeis() public onlyOwner whenClosed {
+        owner.transfer(this.balance);
+    }
+
     function adjustBasedOnTime() internal returns (Adjustments adjusted) {
 
         adjusted.shiftAward = 0;
@@ -199,17 +212,6 @@ contract UmuToken is StandardToken, Ownable {
         return adjusted;
     }
 
-
-    function computeTokens(uint256 weis, Rates rates) internal returns (Tokens tokens) {
-
-        tokens.forSender = weis.mul(uint256(rates.toSender));
-        tokens.forOwner = weis.mul(uint256(rates.toOwner));
-        tokens.forBounty = weis.mul(uint256(rates.toBounty));
-        tokens.total = tokens.forSender.add(tokens.forOwner).add(tokens.forBounty);
-        tokens.newTotalSupply = totalSupply.add(tokens.total);
-        return(tokens);
-    }
-
     function getRates() internal returns (Rates rates) {
 
         if (phase == Phases.PreIcoA) {
@@ -231,24 +233,20 @@ contract UmuToken is StandardToken, Ownable {
         return rates;
     }
 
+    function computeTokens(uint256 weis, Rates rates) internal returns (Tokens tokens) {
+
+        tokens.forSender = weis.mul(uint256(rates.toSender));
+        tokens.forOwner = weis.mul(uint256(rates.toOwner));
+        tokens.forBounty = weis.mul(uint256(rates.toBounty));
+        tokens.total = tokens.forSender.add(tokens.forOwner).add(tokens.forBounty);
+        tokens.newTotalSupply = totalSupply.add(tokens.total);
+        return(tokens);
+    }
 
     function shiftTo(Phases _phase, uint256 award) internal {
         phase = _phase;
         pendingWithdrawals[msg.sender] = pendingWithdrawals[msg.sender].add(award);
         Shifted(phase);
-    }
-
-    function withdraw() public returns (bool) {
-        uint amount = pendingWithdrawals[msg.sender];
-        require(amount > 0);
-
-        pendingWithdrawals[msg.sender] = 0;
-        msg.sender.transfer(amount);
-        return true;
-    }
-
-    function returnWeis() onlyOwner whenClosed {
-        owner.transfer(this.balance);
     }
 
     function transfer(address _to, uint256 _value) public limitForOwner returns (bool) {

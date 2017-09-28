@@ -281,26 +281,6 @@ contract UmuToken is StandardToken, Ownable {
         _;
     }
 
-    modifier whenPreIco() {
-        require((phase == Phases.PreIcoA) || (phase == Phases.PreIcoB));
-        _;
-    }
-
-    modifier whenPreIcoA() {
-        require(phase == Phases.PreIcoA);
-        _;
-    }
-
-    modifier whenPreIcoB() {
-        require(phase == Phases.PreIcoB);
-        _;
-    }
-
-    modifier whenMainIco() {
-        require(phase == Phases.MainIco);
-        _;
-    }
-
     modifier whenIcoActive() {
         require((phase == Phases.PreIcoA) || (phase == Phases.PreIcoB) || (phase == Phases.MainIco));
         _;

@@ -1,11 +1,16 @@
 nmp init
 sudo npm i -g truffle
+sudo npm i -g solium
+
 sudo
 npm i --save-dev zeppelin-solidity
 npm i --save-dev bignumber.js
 
 # init & generate test contracts
 truffle init
+
+# lint solidity code
+ solium --dir contracts/
 
 # compile contracts
 truffle compile

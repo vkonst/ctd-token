@@ -1,0 +1,5 @@
+doc
+contracts/lib
+node_modules
+securityCheck
+scripts

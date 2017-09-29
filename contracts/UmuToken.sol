@@ -3,9 +3,10 @@ pragma solidity 0.4.15;
 import './lib/zeppelin-solidity/math/SafeMath.sol';
 import './lib/zeppelin-solidity/ownership/Ownable.sol';
 import './lib/zeppelin-solidity/token/StandardToken.sol';
+import './PausableOnce.sol';
 
 
-contract UmuToken is StandardToken, Ownable {
+contract UmuToken is StandardToken, Ownable, PausableOnce {
 
     using SafeMath for uint256;
 
@@ -111,7 +112,7 @@ contract UmuToken is StandardToken, Ownable {
         // FIXME: check gas limit
     }
 
-    function setBounty(address _bounty) public onlyOwner whenNotOpened returns (bool) {
+    function setBounty(address _bounty) onlyOwner whenNotOpened public returns (bool) {
 
         require(_bounty != address(0));
         bounty = _bounty;
@@ -169,7 +170,7 @@ contract UmuToken is StandardToken, Ownable {
         return true;
     }
 
-    function returnWeis() public onlyOwner whenClosed {
+    function returnWeis() onlyOwner whenClosed public {
         owner.transfer(this.balance);
     }
 
@@ -249,23 +250,33 @@ contract UmuToken is StandardToken, Ownable {
         Shifted(phase);
     }
 
-    function transfer(address _to, uint256 _value) public limitForOwner returns (bool) {
+    function transfer(address _to, uint256 _value)
+        whenNotPaused limitForOwner public returns (bool)
+    {
         return super.transfer(_to, _value);
     }
 
-    function transferFrom(address _from, address _to, uint256 _value) public limitForOwner returns (bool) {
+    function transferFrom(address _from, address _to, uint256 _value)
+        whenNotPaused limitForOwner public returns (bool)
+    {
         return super.transferFrom(_from, _to, _value);
     }
 
-    function approve(address _spender, uint256 _value) public limitForOwner returns (bool) {
+    function approve(address _spender, uint256 _value)
+        whenNotPaused limitForOwner public returns (bool)
+    {
         return super.approve(_spender, _value);
     }
 
-    function increaseApproval(address _spender, uint _addedValue) public limitForOwner returns (bool success) {
+    function increaseApproval(address _spender, uint _addedValue)
+        whenNotPaused limitForOwner public returns (bool success)
+    {
         return super.increaseApproval(_spender, _addedValue);
     }
 
-    function decreaseApproval(address _spender, uint _subtractedValue) public limitForOwner returns (bool success) {
+    function decreaseApproval(address _spender, uint _subtractedValue)
+        whenNotPaused limitForOwner public returns (bool success)
+    {
         return super.decreaseApproval(_spender, _subtractedValue);
     }
 

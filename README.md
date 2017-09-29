@@ -1,6 +1,6 @@
 # UmU tokens
 
-ERC20 tokens extended with the following features:<br/>
+**ERC20** tokens **extended** with the following features:<br/>
 - Number of tokens to issue(sell) is limited (hard-coded) but not pre-fixed<br/>
 - On top of tokens to buyers (investors) the "company" and "bounty" tokens issued <br />
  `Tokens issed at fixed rate to the contract owner and the bounty program addresses.` <br /> 
@@ -13,18 +13,20 @@ ERC20 tokens extended with the following features:<br/>
   `Limited by total number of tokens for sale during the campaign` <br />
   `as well as by the (main) ICO start date.` <br />
   - _(Main) ICO_: `Tokens are on sale at the regular price.`<br/>
-  - After ICO_: `No new tokens are on sale.` <br/ >
+  `May not occure if tokens sold out on Pre-ICO.` <br />
+  - After ICO_: `Campaign ended. No new tokens may be issued.` <br />
 - Company tokens may not be transferred before 'After ICO' phase. <br/>
 - Anyone may trigger phase change (at specified time, considering limits)<br/>
 - Award(s) is paid in ETH to inintiator(s) of the shift(s)<br/>
 - Pre-ICO and ICO will close if tokens are sold out<br/>
+- Transfers may be paused ONCE for two weeks (to prevent scum)
 - Events (logs) generated for/on:<br/>
   - `New Phase started`<br/>
   - `New tokens issued (generated)`<br/>
   - `Allowance on transer of tokens issued`<br/>
   - `Tokens transferred`<br/>
 - increaseApproval() / decreaseApproval() methods supported<br/> 
-- etc...<br/>
+- _etc...<br/>_
 
 ### tests
 $ `truffle test`

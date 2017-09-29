@@ -27,4 +27,6 @@ truffle migrate
 # https://github.com/airalab/core/wiki/Security-regulations
 # https://blog.zeppelin.solutions/onward-with-ethereum-smart-contract-security-97a827e47702
 
-# TODO: to review https://github.com/TokenMarketNet/ico/tree/master/contracts
+# TODO: to review https://github.com/TokenMarketNet/ico/tree/master/contract
+
+`https://eprint.iacr.org/2016/1007.pdf`

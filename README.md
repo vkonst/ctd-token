@@ -19,12 +19,17 @@
 - Anyone may trigger phase change (at specified time, considering limits)<br/>
 - Award(s) is paid in ETH to inintiator(s) of the shift(s)<br/>
 - Pre-ICO and ICO will close if tokens are sold out<br/>
-- Transfers may be paused ONCE for two weeks (to prevent scum)
+- Transfers **may be paused** ONCE for two weeks (to prevent scum)
+- Tokens **may be upgraded** to a new revision (contract)
 - Events (logs) generated for/on:<br/>
   - `New Phase started`<br/>
   - `New tokens issued (generated)`<br/>
   - `Allowance on transer of tokens issued`<br/>
   - `Tokens transferred`<br/>
+  - `Transfers paused`<br/>
+  - `Upgrade enabled`<br/>
+  - `Tokens upgraded`<br/>
+  - `etc...`<br/>
 - increaseApproval() / decreaseApproval() methods supported<br/> 
 - _etc...<br/>_
 

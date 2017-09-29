@@ -1,12 +1,11 @@
 pragma solidity 0.4.15;
 
 import './lib/zeppelin-solidity/math/SafeMath.sol';
-import './lib/zeppelin-solidity/ownership/Ownable.sol';
-import './lib/zeppelin-solidity/token/StandardToken.sol';
 import './PausableOnce.sol';
+import './UpgradableToken.sol';
 
 
-contract UmuToken is StandardToken, Ownable, PausableOnce {
+contract UmuToken is UpgradableToken, PausableOnce {
 
     using SafeMath for uint256;
 
@@ -119,7 +118,7 @@ contract UmuToken is StandardToken, Ownable, PausableOnce {
         return true;
     }
 
-    function create() payable whenIcoActive public returns (bool) {
+    function create() payable whenIcoActive whenNotPaused public returns (bool) {
 
         require(msg.value > 0);
 

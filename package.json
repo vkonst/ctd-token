@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "umum-ico",
+  "name": "umu-ico",
   "version": "0.0.0",
   "description": "Smart contracts for Umum ICO",
   "main": "bin/app.js",

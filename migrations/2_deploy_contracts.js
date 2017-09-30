@@ -6,8 +6,9 @@ module.exports = function(deployer) {
 
   const threeMinutes = 180;
   const preIcoOpeningTime = unixTimeNow + threeMinutes;
-  const icoOpeningTime = preIcoOpeningTime + threeMinutes;
-  const closingTime = icoOpeningTime + threeMinutes;
 
-  deployer.deploy(UmuToken, preIcoOpeningTime, icoOpeningTime, closingTime);
+  /* const icoOpeningTime = preIcoOpeningTime + threeMinutes;
+  const closingTime = icoOpeningTime + threeMinutes; */
+
+  deployer.deploy(UmuToken, preIcoOpeningTime /*, icoOpeningTime, closingTime*/);
 };

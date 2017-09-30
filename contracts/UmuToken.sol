@@ -3,9 +3,10 @@ pragma solidity 0.4.15;
 import './lib/zeppelin-solidity/math/SafeMath.sol';
 import './PausableOnce.sol';
 import './UpgradableToken.sol';
+import './Withdrawable.sol';
 
 
-contract UmuToken is UpgradableToken, PausableOnce {
+contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
 
     using SafeMath for uint256;
 
@@ -16,8 +17,6 @@ contract UmuToken is UpgradableToken, PausableOnce {
 
     /** Holder of bounty tokens */
     address public bounty;
-
-    mapping (address => uint) pendingWithdrawals;
 
     /** Limit (in Atom) issued, inclusive owner's and bounty shares */
     uint256 constant internal TOTAL_LIMIT = 496000000 * (10 ** uint256(decimals));
@@ -34,6 +33,9 @@ contract UmuToken is UpgradableToken, PausableOnce {
     * - AfterIco: new tokens can not be not be sold/issued any longer
     */
     enum Phases {PreStart, PreIcoA, PreIcoB, MainIco, AfterIco}
+
+    uint64 constant internal PRE_ICO_DURATION = 30 days;
+    uint64 constant internal ICO_DURATION = 80 days;
 
     // Main ICO rate in UMU(s) per 1 ETH:
     uint32 constant internal TO_SENDER_RATE   = 1000;
@@ -53,14 +55,6 @@ contract UmuToken is UpgradableToken, PausableOnce {
     uint256 constant internal ICO_OPENING_AWARD = 200 * (10 ** uint256(15));
     uint256 constant internal ICO_CLOSING_AWARD = 500 * (10 ** uint256(15));
 
-    struct Tokens {
-        uint256 forSender;
-        uint256 forOwner;
-        uint256 forBounty;
-        uint256 total;
-        uint256 newTotalSupply;
-    }
-
     struct Rates {
         uint32 toSender;
         uint32 toOwner;
@@ -68,47 +62,33 @@ contract UmuToken is UpgradableToken, PausableOnce {
         uint32 total;
     }
 
-    struct Adjustments {
-        Phases newPhase;
-        uint256 shiftAward;
-        uint256 overSoldTokens;
-    }
-
     event NewTokens(uint256 amount);
-    event Shifted(Phases phase);
+    event NewPhase(Phases phase);
 
     // current Phase
-    Phases internal phase = Phases.PreStart;
+    Phases public phase = Phases.PreStart;
 
     // Timestamps limiting duration of Phases, in seconds since Unix epoch.
-    // Leave at least 900 (seconds) between the stamps.
-    //
-    uint64 internal preIcoOpeningTime;  // when Pre-ICO Phase A starts
-    uint64 internal icoOpeningTime;     // when Main ICO starts (if not sold out before)
-    uint64 internal closingTime;        // by when the ICO campaign finishes in any way
+    uint64 public preIcoOpeningTime;  // when Pre-ICO Phase A starts
+    uint64 public icoOpeningTime;     // when Main ICO starts (if not sold out before)
+    uint64 public closingTime;        // by when the ICO campaign finishes in any way
 
-
-    function UmuToken(
-        uint64 _preIcoOpeningTime,
-        uint64 _icoOpeningTime,
-        uint64 _closingTime
-        // msg.value MUST be at least the sum of AWARD(s)
-    ) onlyOwner
-    {
+    /*
+    * @param _preIcoOpeningTime Timestamp when the Pre-ICO (Phase A) shall start
+    * msg.value MUST be at least the sum of awards
+    */
+    function UmuToken(uint64 _preIcoOpeningTime) onlyOwner {
         require(_preIcoOpeningTime > now);
-        require(_icoOpeningTime >= preIcoOpeningTime);
-        require(_closingTime > icoOpeningTime);
 
         owner = msg.sender;
         preIcoOpeningTime = _preIcoOpeningTime;
-        icoOpeningTime = _icoOpeningTime;
-        closingTime = _closingTime;
+        icoOpeningTime = preIcoOpeningTime + PRE_ICO_DURATION;
+        closingTime = icoOpeningTime + ICO_DURATION;
     }
 
-    // fallback function allows sending ETH to token address directly
-    function () payable external {
+    /// @dev Fallback function delegates the request to create().
+    function () payable whenIcoActive external {
         create();
-        // FIXME: check gas limit
     }
 
     function setBounty(address _bounty) onlyOwner whenNotOpened public returns (bool) {
@@ -119,97 +99,95 @@ contract UmuToken is UpgradableToken, PausableOnce {
     }
 
     function create() payable whenIcoActive whenNotPaused public returns (bool) {
-
         require(msg.value > 0);
 
         Phases oldPhase = phase;
-        uint256 adjustedValue = msg.value;
-        uint256 overPaidValue = 0;
+        uint256 weiToParticipate = msg.value;
+        uint256 overpaidWei = 0;
 
-        Adjustments memory adjusted = adjustBasedOnTime();
+        adjustPhaseBasedOnTime();
         Rates memory rates = getRates();
-        Tokens memory tokens = computeTokens(msg.value, rates);
-        adjusted = adjustBasedOnQty(tokens.newTotalSupply, adjusted);
+        uint256 newTokens = weiToParticipate.mul(uint256(rates.total));
+        uint256 requestedSupply = totalSupply.add(newTokens);
 
-        if (adjusted.overSoldTokens > 0) {
-            overPaidValue = adjusted.overSoldTokens.div(rates.total);
-            adjustedValue = msg.value.sub(overPaidValue);
-            tokens = computeTokens(adjustedValue, rates);
+        uint256 oversoldTokens = computeOversoldAndAdjustPhase(requestedSupply);
+        if (oversoldTokens > 0) {
+            overpaidWei = oversoldTokens.div(rates.total);
+            weiToParticipate = msg.value.sub(overpaidWei);
+            newTokens = weiToParticipate.mul(uint256(rates.total));
+            requestedSupply = totalSupply.add(newTokens);
         }
 
         // new tokens "emission"
-        totalSupply = tokens.newTotalSupply;
-        balances[msg.sender] = balances[msg.sender].add(tokens.forSender);
-        balances[owner] = balances[owner].add(tokens.forOwner);
-        balances[bounty] = balances[bounty].add(tokens.forBounty);
+        totalSupply = requestedSupply;
+        balances[msg.sender] = balances[msg.sender].add(weiToParticipate.mul(uint256(rates.toSender)));
+        balances[owner] = balances[owner].add(weiToParticipate.mul(uint256(rates.toOwner)));
+        balances[bounty] = balances[bounty].add(weiToParticipate.mul(uint256(rates.toBounty)));
 
         // ETH transfers
-        if (overPaidValue > 0) {
-            pendingWithdrawals[msg.sender] = pendingWithdrawals[msg.sender].add(overPaidValue);
-            owner.transfer(adjustedValue);
-        } else {
-            owner.transfer(msg.value);
+        owner.transfer(weiToParticipate);
+        if (overpaidWei > 0) {
+            withdrawal(msg.sender, overpaidWei);
         }
-
-        // Event emitting
-        NewTokens(tokens.total);
-        if (adjusted.newPhase != oldPhase) {
-            shiftTo(adjusted.newPhase, adjusted.shiftAward);
+        // Logging and awarding
+        NewTokens(newTokens);
+        if (phase != oldPhase) {
+            logShiftAndBookAward();
         }
 
         return true;
     }
 
-    function withdraw() public returns (bool) {
-        uint amount = pendingWithdrawals[msg.sender];
-        require(amount > 0);
-
-        pendingWithdrawals[msg.sender] = 0;
-        msg.sender.transfer(amount);
-        return true;
-    }
-
-    function returnWeis() onlyOwner whenClosed public {
+    function returnWei() onlyOwner whenClosed public {
         owner.transfer(this.balance);
     }
 
-    function adjustBasedOnTime() internal returns (Adjustments adjusted) {
+    function adjustPhaseBasedOnTime() internal {
 
-        adjusted.shiftAward = 0;
-        adjusted.overSoldTokens = 0;
-
-        if ((now >= closingTime) && (phase != Phases.AfterIco)) {
-            phase = Phases.AfterIco;
-            adjusted.shiftAward = ICO_CLOSING_AWARD;
-
-        } else if ((now >= icoOpeningTime) &&
-        ((phase == Phases.PreIcoA) || (phase == Phases.PreIcoB))) {
-            phase = Phases.MainIco;
-            adjusted.shiftAward = ICO_OPENING_AWARD;
-
-        } else if ((now >= preIcoOpeningTime) && (phase == Phases.PreStart)) {
-            phase = Phases.PreIcoA;
-            adjusted.shiftAward = PRE_OPENING_AWARD;
+        if (now >= closingTime) {
+            if (phase != Phases.AfterIco) {
+                phase = Phases.AfterIco;
+            }
+        } else if (now >= icoOpeningTime) {
+            if (phase != Phases.MainIco) {
+                phase = Phases.MainIco;
+            }
+        } else if (now >= preIcoOpeningTime) {
+            if (phase == Phases.PreStart) {
+                setDefaultParamsIfNeeded();
+                phase = Phases.PreIcoA;
+            }
         }
-
-        adjusted.newPhase = phase;
-        return adjusted;
     }
 
-    function adjustBasedOnQty(uint256 newTotalSupply, Adjustments adjusted) internal returns (Adjustments) {
+    function setDefaultParamsIfNeeded() internal {
+        if (bounty == address(0)) {
+            bounty = owner;
+        }
+        if (upgradeMaster == address(0)) {
+            upgradeMaster = owner;
+        }
+        if (pauseMaster == address(0)) {
+            pauseMaster = owner;
+        }
+    }
+
+    function computeOversoldAndAdjustPhase(uint256 newTotalSupply) internal returns (uint256 oversoldTokens) {
 
         if (newTotalSupply >= TOTAL_LIMIT) {
-            adjusted.overSoldTokens = newTotalSupply.sub(TOTAL_LIMIT);
-            adjusted.newPhase = Phases.AfterIco;
-            adjusted.shiftAward = ICO_CLOSING_AWARD;
+            phase = Phases.AfterIco;
+            oversoldTokens = newTotalSupply.sub(TOTAL_LIMIT);
 
-        } else if ((phase == Phases.PreIcoA) && (newTotalSupply >= PRE_ICO_LIMIT)) {
-            adjusted.overSoldTokens = newTotalSupply.sub(PRE_ICO_LIMIT);
-            adjusted.newPhase = (now >= icoOpeningTime) ? Phases.PreIcoB : Phases.AfterIco;
-            adjusted.shiftAward = (now >= icoOpeningTime) ? ICO_OPENING_AWARD : ICO_CLOSING_AWARD;
+        } else if ((phase == Phases.PreIcoA) &&
+                   (newTotalSupply >= PRE_ICO_LIMIT)) {
+            phase = Phases.PreIcoB;
+            oversoldTokens = newTotalSupply.sub(PRE_ICO_LIMIT);
+
+        } else {
+            oversoldTokens = 0;
         }
 
-        return adjusted;
+        return oversoldTokens;
     }
 
     function getRates() internal returns (Rates rates) {
@@ -233,20 +211,22 @@ contract UmuToken is UpgradableToken, PausableOnce {
         return rates;
     }
 
-    function computeTokens(uint256 weis, Rates rates) internal returns (Tokens tokens) {
+    function logShiftAndBookAward() internal {
+        uint256 shiftAward;
 
-        tokens.forSender = weis.mul(uint256(rates.toSender));
-        tokens.forOwner = weis.mul(uint256(rates.toOwner));
-        tokens.forBounty = weis.mul(uint256(rates.toBounty));
-        tokens.total = tokens.forSender.add(tokens.forOwner).add(tokens.forBounty);
-        tokens.newTotalSupply = totalSupply.add(tokens.total);
-        return(tokens);
-    }
+        if (phase == Phases.PreIcoA) {
+            shiftAward = ICO_OPENING_AWARD;
 
-    function shiftTo(Phases _phase, uint256 award) internal {
-        phase = _phase;
-        pendingWithdrawals[msg.sender] = pendingWithdrawals[msg.sender].add(award);
-        Shifted(phase);
+        } else if (phase == Phases.MainIco) {
+            shiftAward = PRE_OPENING_AWARD;
+
+        } else {
+            shiftAward = ICO_CLOSING_AWARD;
+        }
+
+        withdrawal(msg.sender, shiftAward);
+        NewPhase(phase);
+        Withdrawal(msg.sender, shiftAward);
     }
 
     function transfer(address _to, uint256 _value)

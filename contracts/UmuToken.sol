@@ -91,14 +91,14 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
         create();
     }
 
-    function setBounty(address _bounty) onlyOwner whenNotOpened public returns (bool) {
+    function setBounty(address _bounty) onlyOwner whenNotOpened public returns (bool success) {
 
         require(_bounty != address(0));
         bounty = _bounty;
         return true;
     }
 
-    function create() payable whenIcoActive whenNotPaused public returns (bool) {
+    function create() payable whenIcoActive whenNotPaused public returns (bool success) {
         require(msg.value > 0);
 
         Phases oldPhase = phase;
@@ -230,19 +230,19 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     }
 
     function transfer(address _to, uint256 _value)
-        whenNotPaused limitForOwner public returns (bool)
+        whenNotPaused limitForOwner public returns (bool success)
     {
         return super.transfer(_to, _value);
     }
 
     function transferFrom(address _from, address _to, uint256 _value)
-        whenNotPaused limitForOwner public returns (bool)
+        whenNotPaused limitForOwner public returns (bool success)
     {
         return super.transferFrom(_from, _to, _value);
     }
 
     function approve(address _spender, uint256 _value)
-        whenNotPaused limitForOwner public returns (bool)
+        whenNotPaused limitForOwner public returns (bool success)
     {
         return super.approve(_spender, _value);
     }
@@ -257,6 +257,10 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
         whenNotPaused limitForOwner public returns (bool success)
     {
         return super.decreaseApproval(_spender, _subtractedValue);
+    }
+
+    function withdraw() whenNotPaused public returns (bool success) {
+        return super.withdraw();
     }
 
     modifier whenNotOpened() {

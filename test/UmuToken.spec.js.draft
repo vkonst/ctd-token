@@ -10,6 +10,17 @@ contract('UmuToken', function(accounts) {
     });
   });
 
+  it("should set bounty address", function() {
+    let bounty = accounts[5];
+    return UmuToken.deployed().then(function(instance) {
+      return instance.setBounty.call(bounty)
+        .then(function() { return instance.bounty.call();})
+    })
+      .then(function(_bounty) {
+        assert.equal(_bounty, bounty, "bounty address was not set");
+    });
+  });
+
   it("should send coin correctly", function() {
     let umu;
 

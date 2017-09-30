@@ -60,7 +60,7 @@ contract UpgradableToken is StandardToken, Ownable {
         require(value > 0);
 
         uint256 balance = balances[msg.sender];
-        assert(balance > 0);
+        require(balance > 0);
 
         // Take tokens out from the old contract
         balances[msg.sender] = balance.sub(value);

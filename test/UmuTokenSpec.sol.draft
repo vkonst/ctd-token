@@ -6,20 +6,30 @@ import "../contracts/UmuToken.sol";
 
 contract UmuTokenSpec {
 
-  function testInitialBalanceUsingDeployedContract() {
+  function testSetBountyUsingDeployedContract() {
     UmuToken umu = UmuToken(DeployedAddresses.UmuToken());
 
-    uint expected = 10000;
-
-    Assert.equal(umu.getBalance(tx.origin), expected, "Owner should have 10000 UmuToken(s) initially");
+    address bounty = "0xb9dcbf8a52edc0c8dd9983fcc1d97b1f5d975ed";
+    bool expected = true;
+    Assert.equal(umu.setBounty(bounty), expected, "sentBounty has not returned true");
+    Assert.equal(umu.bounty(), bounty, "bounty has not been set");
   }
 
-  function testInitialBalanceWithNewUmuCoin() {
-    UmU umu = new UmU();
-
-    uint expected = 10000;
-
-    Assert.equal(umu.getBalance(tx.origin), expected, "Owner should have 10000 UmuToken(s) initially");
-  }
+//
+//  function testInitialBalanceUsingDeployedContract() {
+//    UmuToken umu = UmuToken(DeployedAddresses.UmuToken());
+//
+//    uint expected = 10000;
+//
+//    Assert.equal(umu.getBalance(tx.origin), expected, "Owner should have 10000 UmuToken(s) initially");
+//  }
+//
+//  function testInitialBalanceWithNewUmuCoin() {
+//    UmU umu = new UmU();
+//
+//    uint expected = 10000;
+//
+//    Assert.equal(umu.getBalance(tx.origin), expected, "Owner should have 10000 UmuToken(s) initially");
+//  }
 
 }

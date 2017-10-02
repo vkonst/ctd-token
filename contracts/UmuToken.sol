@@ -77,7 +77,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     * @param _preIcoOpeningTime Timestamp when the Pre-ICO (Phase A) shall start
     * msg.value MUST be at least the sum of awards
     */
-    function UmuToken(uint64 _preIcoOpeningTime) onlyOwner {
+    function UmuToken(uint64 _preIcoOpeningTime) {
         require(_preIcoOpeningTime > now);
 
         owner = msg.sender;

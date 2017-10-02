@@ -16,7 +16,7 @@ contract PausableOnce is Ownable {
     address public pauseMaster;
 
     uint constant internal PAUSE_DURATION = 14 days;
-    uint public pauseEnd = 0;
+    uint64 public pauseEnd = 0;
 
     event Paused();
 
@@ -35,7 +35,7 @@ contract PausableOnce is Ownable {
      */
     function pause() onlyPauseMaster external returns (bool success) {
         require(pauseEnd == 0);
-        pauseEnd = now + PAUSE_DURATION;
+        pauseEnd = uint64(now + PAUSE_DURATION);
         Paused();
         return true;
     }

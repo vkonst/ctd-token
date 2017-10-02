@@ -8,5 +8,12 @@ module.exports = {
       port: 8545,
       network_id: "*" // Match any network id
     }
+  },
+  mocha: {
+      useColors: true,
+      slow: 30000,
+      bail: true,
+      grep: "test",
+      invert: true
   }
 };

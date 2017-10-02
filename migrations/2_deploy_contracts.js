@@ -1,11 +1,14 @@
 module.exports = function(deployer) {
-  "use strict";
+    "use strict";
 
-  const UmuToken = artifacts.require('./UmuToken.sol');
-  const timeNow = parseInt(new Date() / 1000);
+    console.warn('2_deploy_contract.js called');
 
-  const threeMinutes = 180;
-  const preIcoOpeningTime = timeNow + threeMinutes;
+    // const timeNow = parseInt(new Date() / 1000);
+    // const threeMinutes = 180;
+    // const preIcoOpeningTime = timeNow + threeMinutes;
 
-  deployer.deploy(UmuToken, preIcoOpeningTime);
+    // const UmuToken = artifacts.require('./UmuToken.sol');
+    // console.warn("*** UmuToken    .binary.length :" + UmuToken.binary.length);
+    // deployer.deploy(UmuToken, preIcoOpeningTime);
+
 };

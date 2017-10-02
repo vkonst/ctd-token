@@ -39,12 +39,12 @@ contract('PausableOnce', (accounts) => {
             assert.equal(await pausable.pauseMaster(), master);
         });
 
-        it('should not allow changing the pauseMaster to non-owners', async () => {
+        it('should not allow setting the pauseMaster by non-owners', async () => {
             assert((await pausable.owner()) != stranger);
             await expectThrows(pausable.setPauseMaster(master, {from: stranger}));
         });
 
-        it('should not allow changing the owner to null or 0 address', async () => {
+        it('should not allow setting to null or 0 address by the owner ', async () => {
             await expectThrows(pausable.setPauseMaster(null, {from: owner}));
             await expectThrows(pausable.setPauseMaster(0, {from: owner}));
         });
@@ -115,12 +115,12 @@ contract('PausableOnce', (accounts) => {
     describe('whenNotPaused<modifier>', async () => {
 
         it('should NOT throw if the pause master is yet unset', async () => {
-            let result = await pausable.testWhenNotPaused.call();
+            let result = await pausable.testModifierWhenNotPaused();
             assert.equal(result, true);
         });
 
         it('... and should NOT throw if called by non-owners', async () => {
-            let result = await pausable.testWhenNotPaused.call({from: stranger});
+            let result = await pausable.testModifierWhenNotPaused({from: stranger});
             assert.equal(result, true);
         });
 
@@ -141,13 +141,13 @@ contract('PausableOnce', (accounts) => {
             });
 
             it('should throw being called during the pause', async () => {
-                await expectThrows(pausable.testWhenNotPaused.call());
+                await expectThrows(pausable.testModifierWhenNotPaused());
             });
 
             it('should NOT throw being called after the pause', async () => {
                 await increaseTime(PAUSE_DURATION + 60);
 
-                let result = await pausable.testWhenNotPaused.call();
+                let result = await pausable.testModifierWhenNotPaused();
                 assert.equal(result, true);
             });
 

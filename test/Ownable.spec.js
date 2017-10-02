@@ -43,7 +43,7 @@ contract('Ownable', (accounts) => {
             assert.equal(owner, await ownable.owner());
         });
 
-        it('should emit Ownable on succesful transfer', async () => {
+        it('should emit OwnershipTransferred on succesful assignment', async () => {
             let result = await ownable.transferOwnership(newOwner);
 
             assert.lengthOf(result.logs, 1);
@@ -57,12 +57,12 @@ contract('Ownable', (accounts) => {
     describe('onlyOwner<modifier>', async () => {
 
         it('should allow execution if called by the owner', async () => {
-            let result = await ownable.testOnlyOwner.call({from: owner});
+            let result = await ownable.testModifierOnlyOwner({from: owner});
             assert.equal(result, true);
         });
 
         it('should throw execution if called by non-owners', async () => {
-            await expectThrows(ownable.testOnlyOwner.call({from: stranger}));
+            await expectThrows(ownable.testModifierOnlyOwner({from: stranger}));
         });
 
     });

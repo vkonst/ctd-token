@@ -137,10 +137,10 @@ contract('Withdrawable', (accounts) => {
             });
 
             it('... should send ETH balance to the drawer at the his (her) call', async () => {
-                let oldWeiBalance = await withdrawable.getBalanceAt.call(drawer, {from: drawer});
+                let oldWeiBalance = await withdrawable.getBalanceAt(drawer, {from: drawer});
                 let result =  await withdrawable.withdraw.call({from: drawer});
                 await withdrawable.withdraw({from: drawer});
-                let newWeiBalance = await withdrawable.getBalanceAt.call(drawer, {from: drawer});
+                let newWeiBalance = await withdrawable.getBalanceAt(drawer, {from: drawer});
                 let weiReceived = newWeiBalance.sub(oldWeiBalance);
 
                 assert.equal(result, true);
@@ -178,7 +178,7 @@ contract('Withdrawable', (accounts) => {
 
     async function checkContractBalance(expectedWei) {
         if (!expectedWei) expectedWei = contractOpeningBalance;
-        let balance = await withdrawable.getBalance.call();
+        let balance = await withdrawable.getBalance();
         assert(balance.toNumber(), expectedWei);
     }
 

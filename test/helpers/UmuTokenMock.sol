@@ -15,11 +15,11 @@ contract UmuTokenMock is UmuToken {
         return addr.balance;
     }
 
-    function testModifierOnlyOwner() onlyOwner public returns (bool) {
+    function testModifierOnlyOwner() onlyOwner public constant returns (bool) {
         return true;
     }
 
-    function testModifierWhenNotPaused() whenNotPaused public returns(bool) {
+    function testModifierWhenNotPaused() whenNotPaused constant public returns(bool) {
         return true;
     }
 
@@ -27,7 +27,7 @@ contract UmuTokenMock is UmuToken {
         return withdrawal(drawer, weiAmount);
     }
 
-    function testPendingWithdrawalAmount() public returns (uint256 weiAmount) {
+    function testPendingWithdrawalAmount() public constant returns (uint256 weiAmount) {
         return(pendingWithdrawals[msg.sender]);
     }
 

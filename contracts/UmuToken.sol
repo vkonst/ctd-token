@@ -63,6 +63,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     }
 
     event NewTokens(uint256 amount);
+    event NewFunds(address funder, uint256 value);
     event NewPhase(Phases phase);
 
     // current Phase
@@ -77,7 +78,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     * @param _preIcoOpeningTime Timestamp when the Pre-ICO (Phase A) shall start
     * msg.value MUST be at least the sum of awards
     */
-    function UmuToken(uint64 _preIcoOpeningTime) {
+    function UmuToken(uint64 _preIcoOpeningTime) payable {
         require(_preIcoOpeningTime > now);
 
         owner = msg.sender;
@@ -131,6 +132,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
         }
         // Logging and awarding
         NewTokens(newTokens);
+        NewFunds(msg.sender, weiToParticipate);
         if (phase != oldPhase) {
             logShiftAndBookAward();
         }

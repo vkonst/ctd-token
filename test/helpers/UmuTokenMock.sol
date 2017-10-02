@@ -5,7 +5,15 @@ import '../../contracts/UmuToken.sol';
 
 contract UmuTokenMock is UmuToken {
 
-    function UmuTokenMock(uint64 _preIcoOpeningTime) UmuToken (_preIcoOpeningTime) { }
+    function UmuTokenMock(uint64 _preIcoOpeningTime) payable UmuToken (_preIcoOpeningTime) { }
+
+    function getBalance() public constant returns (uint256 weiAmount) {
+        return this.balance;
+    }
+
+    function getBalanceAt(address addr) public constant returns (uint256 weiAmount) {
+        return addr.balance;
+    }
 
     function testModifierOnlyOwner() onlyOwner public returns (bool) {
         return true;

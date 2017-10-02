@@ -24,6 +24,7 @@
 - Events (logs) generated for/on:<br/>
   - `New Phase started`<br/>
   - `New tokens issued (generated)`<br/>
+  - `New funds (ETH) received` <br/>
   - `Allowance on transer of tokens issued`<br/>
   - `Tokens transferred`<br/>
   - `Transfers paused`<br/>

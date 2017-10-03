@@ -1,7 +1,7 @@
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 
-const Ownable = artifacts.require('./helpers/UmuTokenMock.sol');
+const OwnableMock = artifacts.require('./helpers/UmuTokenMock.sol');
 
 
 contract('Ownable', (accounts) => {
@@ -15,11 +15,11 @@ contract('Ownable', (accounts) => {
         const tenSeconds = 10;
         const timeNow = await latestTime();
         const preIcoOpeningTime = timeNow + tenSeconds;
-        ownable = await Ownable.new(preIcoOpeningTime);
+        ownable = await OwnableMock.new(preIcoOpeningTime);
     });
 
-    describe('construction', async () => {
-        it('should have an owner', async () => {
+    describe('constructor', async () => {
+        it('should set an owner', async () => {
             assert.equal(await ownable.owner(), owner);
         });
     });

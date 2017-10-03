@@ -92,7 +92,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
         create();
     }
 
-    function setBounty(address _bounty) onlyOwner whenNotOpened public returns (bool success) {
+    function setBounty(address _bounty) onlyOwner public returns (bool success) {
 
         require(_bounty != address(0));
         bounty = _bounty;

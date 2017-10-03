@@ -1,7 +1,7 @@
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 
-const Withdrawable = artifacts.require('./helpers/UmuTokenMock.sol');
+const WithdrawableMock = artifacts.require('./helpers/UmuTokenMock.sol');
 
 contract('Withdrawable', (accounts) => {
     let withdrawable;
@@ -17,7 +17,7 @@ contract('Withdrawable', (accounts) => {
         const tenSeconds = 10;
         const timeNow = await latestTime();
         const preIcoOpeningTime = timeNow + tenSeconds;
-        withdrawable = await Withdrawable.new(preIcoOpeningTime, {value: contractOpeningBalance});
+        withdrawable = await WithdrawableMock.new(preIcoOpeningTime, {value: contractOpeningBalance});
         await checkContractBalance();
     });
 
@@ -179,7 +179,7 @@ contract('Withdrawable', (accounts) => {
     async function checkContractBalance(expectedWei) {
         if (!expectedWei) expectedWei = contractOpeningBalance;
         let balance = await withdrawable.getBalance();
-        assert(balance.toNumber(), expectedWei);
+        assert.equal(balance.toNumber(), expectedWei);
     }
 
 });

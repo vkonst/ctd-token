@@ -3,7 +3,7 @@ import increaseTime from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import {duration} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 
-const Pausable = artifacts.require('./helpers/UmuTokenMock.sol');
+const PausableOnceMock = artifacts.require('./helpers/UmuTokenMock.sol');
 
 const PAUSE_DURATION = duration.days(14);
 
@@ -18,10 +18,10 @@ contract('PausableOnce', (accounts) => {
         const tenSeconds = 10;
         const timeNow = await latestTime();
         const preIcoOpeningTime = timeNow + tenSeconds;
-        pausable = await Pausable.new(preIcoOpeningTime);
+        pausable = await PausableOnceMock.new(preIcoOpeningTime);
     });
 
-    describe('construction', async () => {
+    describe('constructor', async () => {
 
         it('should set pauseMaster to 0', async () => {
             assert.equal(await pausable.pauseMaster(), 0);

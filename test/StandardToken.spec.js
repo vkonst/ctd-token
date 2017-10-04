@@ -21,7 +21,7 @@ contract('StandardToken', (accounts) => {
         token = await StandardTokenMock.new(preIcoOpeningTime);
         await token.simulateNewTokens(transferor, tokensOnSale);
 
-        assert.equal((await token.getTokenBalance(transferor)).toNumber(), tokensOnSale);
+        assert.equal((await token.getTokenBalanceOf(transferor)).toNumber(), tokensOnSale);
     });
 
     describe('totalSupply', async () => {

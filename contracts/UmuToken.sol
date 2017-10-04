@@ -19,9 +19,9 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     address public bounty;
 
     /** Limit (in Atom) issued, inclusive owner's and bounty shares */
-    uint256 constant internal TOTAL_LIMIT = 496000000 * (10 ** uint256(decimals));
+    uint256 constant internal TOTAL_LIMIT   = 650000000 * (10 ** uint256(decimals));
     /** Limit (in Atom) for Pre-ICO Phases A, incl. owner's and bounty shares */
-    uint256 constant internal PRE_ICO_LIMIT = 99200000 * (10 ** uint256(decimals));
+    uint256 constant internal PRE_ICO_LIMIT = 130000000 * (10 ** uint256(decimals));
 
     /**
     * ICO Phases.
@@ -35,20 +35,20 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     enum Phases {PreStart, PreIcoA, PreIcoB, MainIco, AfterIco}
 
     uint64 constant internal PRE_ICO_DURATION = 30 days;
-    uint64 constant internal ICO_DURATION = 80 days;
+    uint64 constant internal ICO_DURATION = 82 days;
 
     // Main ICO rate in UMU(s) per 1 ETH:
     uint32 constant internal TO_SENDER_RATE   = 1000;
-    uint32 constant internal TO_OWNER_RATE    =  200;
-    uint32 constant internal TO_BOUNTY_RATE   =   40;
+    uint32 constant internal TO_OWNER_RATE    =  263;
+    uint32 constant internal TO_BOUNTY_RATE   =   52;
     // Pre-ICO Phase A rate
     uint32 constant internal TO_SENDER_RATE_A = 1150;
-    uint32 constant internal TO_OWNER_RATE_A  =  230;
-    uint32 constant internal TO_BOUNTY_RATE_A =   46;
+    uint32 constant internal TO_OWNER_RATE_A  =  304;
+    uint32 constant internal TO_BOUNTY_RATE_A =   61;
     // Pre-ICO Phase B rate
     uint32 constant internal TO_SENDER_RATE_B = 1100;
-    uint32 constant internal TO_OWNER_RATE_B  =  220;
-    uint32 constant internal TO_BOUNTY_RATE_B =   44;
+    uint32 constant internal TO_OWNER_RATE_B  =  292;
+    uint32 constant internal TO_BOUNTY_RATE_B =   58;
 
     // Award in Wei(s) to a successful initiator of a Phase shift
     uint256 constant internal PRE_OPENING_AWARD = 100 * (10 ** uint256(15));
@@ -74,6 +74,8 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     uint64 public icoOpeningTime;     // when Main ICO starts (if not sold out before)
     uint64 public closingTime;        // by when the ICO campaign finishes in any way
 
+    uint256 public totalProceeds;
+
     /*
     * @param _preIcoOpeningTime Timestamp when the Pre-ICO (Phase A) shall start
     * msg.value MUST be at least the sum of awards
@@ -88,7 +90,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     }
 
     /// @dev Fallback function delegates the request to create().
-    function () payable whenIcoActive external {
+    function () payable external {
         create();
     }
 
@@ -99,40 +101,51 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
         return true;
     }
 
-    function create() payable whenIcoActive whenNotPaused public returns (bool success) {
+    function create() payable whenNotClosed whenNotPaused public returns (bool success) {
         require(msg.value > 0);
+        require(now >= preIcoOpeningTime);
 
         Phases oldPhase = phase;
         uint256 weiToParticipate = msg.value;
         uint256 overpaidWei = 0;
 
         adjustPhaseBasedOnTime();
-        Rates memory rates = getRates();
-        uint256 newTokens = weiToParticipate.mul(uint256(rates.total));
-        uint256 requestedSupply = totalSupply.add(newTokens);
 
-        uint256 oversoldTokens = computeOversoldAndAdjustPhase(requestedSupply);
-        if (oversoldTokens > 0) {
-            overpaidWei = oversoldTokens.div(rates.total);
-            weiToParticipate = msg.value.sub(overpaidWei);
-            newTokens = weiToParticipate.mul(uint256(rates.total));
-            requestedSupply = totalSupply.add(newTokens);
+        if (phase != Phases.AfterIco) {
+
+            Rates memory rates = getRates();
+            uint256 newTokens = weiToParticipate.mul(uint256(rates.total));
+            uint256 requestedSupply = totalSupply.add(newTokens);
+
+            uint256 oversoldTokens = computeOversoldAndAdjustPhase(requestedSupply);
+            if (oversoldTokens > 0) {
+                overpaidWei = oversoldTokens.div(rates.total);
+                weiToParticipate = msg.value.sub(overpaidWei);
+                newTokens = weiToParticipate.mul(uint256(rates.total));
+                requestedSupply = totalSupply.add(newTokens);
+            }
+
+            // "emission" of new tokens
+            totalSupply = requestedSupply;
+            balances[msg.sender] = balances[msg.sender].add(weiToParticipate.mul(uint256(rates.toSender)));
+            balances[owner] = balances[owner].add(weiToParticipate.mul(uint256(rates.toOwner)));
+            balances[bounty] = balances[bounty].add(weiToParticipate.mul(uint256(rates.toBounty)));
+
+            // ETH transfers
+            totalProceeds = totalProceeds.add(weiToParticipate);
+            owner.transfer(weiToParticipate);
+            if (overpaidWei > 0) {
+                withdrawal(msg.sender, overpaidWei);
+            }
+
+            // Logging
+            NewTokens(newTokens);
+            NewFunds(msg.sender, weiToParticipate);
+
+        } else {
+            withdrawal(msg.sender, msg.value);
         }
 
-        // new tokens "emission"
-        totalSupply = requestedSupply;
-        balances[msg.sender] = balances[msg.sender].add(weiToParticipate.mul(uint256(rates.toSender)));
-        balances[owner] = balances[owner].add(weiToParticipate.mul(uint256(rates.toOwner)));
-        balances[bounty] = balances[bounty].add(weiToParticipate.mul(uint256(rates.toBounty)));
-
-        // ETH transfers
-        owner.transfer(weiToParticipate);
-        if (overpaidWei > 0) {
-            withdrawal(msg.sender, overpaidWei);
-        }
-        // Logging and awarding
-        NewTokens(newTokens);
-        NewFunds(msg.sender, weiToParticipate);
         if (phase != oldPhase) {
             logShiftAndBookAward();
         }
@@ -154,11 +167,9 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
             if (phase != Phases.MainIco) {
                 phase = Phases.MainIco;
             }
-        } else if (now >= preIcoOpeningTime) {
-            if (phase == Phases.PreStart) {
-                setDefaultParamsIfNeeded();
-                phase = Phases.PreIcoA;
-            }
+        } else if (phase == Phases.PreStart) {
+            setDefaultParamsIfNeeded();
+            phase = Phases.PreIcoA;
         }
     }
 
@@ -265,18 +276,13 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
         return super.withdraw();
     }
 
-    modifier whenNotOpened() {
-        require(phase == Phases.PreStart);
-        _;
-    }
-
     modifier whenClosed() {
-        require(phase >= Phases.AfterIco);
+        require(phase == Phases.AfterIco);
         _;
     }
 
-    modifier whenIcoActive() {
-        require((phase == Phases.PreIcoA) || (phase == Phases.PreIcoB) || (phase == Phases.MainIco));
+    modifier whenNotClosed() {
+        require(phase != Phases.AfterIco);
         _;
     }
 

@@ -20,7 +20,7 @@ contract UmuTokenMock is UmuToken {
         balances[_to] = balances[_to].add(tokens);
     }
 
-    function getTokenBalance(address _owner) public constant returns (uint256 tokens) {
+    function getTokenBalanceOf(address _owner) public constant returns (uint256 tokens) {
         return balances[_owner];
     }
 

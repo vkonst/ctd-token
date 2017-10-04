@@ -13,7 +13,7 @@ module.exports = {
       useColors: true,
       slow: 30000,
       bail: true,
-      grep: "test",
+      grep: "UmuTokenMock", // "test",
       invert: true
   }
 };

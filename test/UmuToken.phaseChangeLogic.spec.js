@@ -1,7 +1,7 @@
 'use strict';
 
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
-import increaseTime, {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
+import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 import params from './helpers/UmuToken.params';
 
@@ -9,28 +9,15 @@ const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
 
 let DUMP = false;
 
-contract('StandardToken', (accounts) => {
+contract('UmuToken Phases', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime, icoClosingTime;
 
     let owner = accounts[0];
     let buyer = accounts[1];
-    let stranger = accounts[3];
 
     const OneWei = 1;
     const OneEth = 1e18;
     const tenSeconds = 10;
-
-    const maxPreIcoAPhaseWei = params.tokenQtyLimits.preIco
-        .div(params.tokenRates.preIcoA.total)
-        .toNumber();
-
-    const maxPreIcoBPhaseWei =(params.tokenQtyLimits.total.sub(params.tokenQtyLimits.preIco))
-        .div(params.tokenRates.preIcoB.total)
-        .toNumber();
-
-    const maxIcoPhaseWei = (params.tokenQtyLimits.total.sub(params.tokenQtyLimits.preIco))
-        .div(params.tokenRates.mainIco.total)
-        .toNumber();
 
     beforeEach(async () => {
         const timeNow = await latestTime();
@@ -115,7 +102,7 @@ contract('StandardToken', (accounts) => {
         });
 
         it('should switch to "Phase B" if PRE_ICO_LIMIT tokens sold out before "icoOpeningTime"', async () => {
-            await callCreate({value: maxPreIcoAPhaseWei + OneEth});
+            await callCreate({value: params.maxIcoPhaseWei + OneEth});
             await checkPhase(params.icoPhases.preIcoB);
             await dump('*** =1.1');
         });
@@ -142,14 +129,14 @@ contract('StandardToken', (accounts) => {
         beforeEach(async () => {
             // switch to Phase B
             await increaseTimeTo(preIcoOpeningTime + tenSeconds);
-            await callCreate({from: buyer, value: maxPreIcoAPhaseWei + OneEth});
+            await callCreate({from: buyer, value: params.maxIcoPhaseWei + OneEth});
 
             await checkPhase(params.icoPhases.preIcoB);
             await dump('*** 2.x');
         });
 
         it('should switch to "After ICO" if "ICO_LIMIT" tokens sold out before "icoOpeningTime"', async () => {
-            await callCreate({from: buyer, value: maxPreIcoBPhaseWei + OneEth});
+            await callCreate({from: buyer, value: params.maxPreIcoBPhaseWei + OneEth});
             await checkPhase(params.icoPhases.afterIco);
             await dump('*** =2.1');
         });
@@ -185,7 +172,7 @@ contract('StandardToken', (accounts) => {
 
 
         it('should switch to "After ICO" if ICO_LIMIT tokens sold out before "icoClosingTime"', async () =>  {
-            await callCreate({from: buyer, value: maxPreIcoBPhaseWei + maxIcoPhaseWei + OneEth});
+            await callCreate({from: buyer, value: params.maxPreIcoBPhaseWei + params.maxIcoPhaseWei + OneEth});
             await checkPhase(params.icoPhases.afterIco);
             await dump('*** =3.1');
         });
@@ -216,7 +203,7 @@ contract('StandardToken', (accounts) => {
 
         it('should never end if ICO_LIMIT tokens sold out', async () =>  {
             await increaseTimeTo(preIcoOpeningTime + tenSeconds);
-            await callCreate({from: buyer, value: maxPreIcoBPhaseWei + maxIcoPhaseWei + OneEth});
+            await callCreate({from: buyer, value: params.maxPreIcoBPhaseWei + params.maxIcoPhaseWei + OneEth});
             await checkPhase(params.icoPhases.afterIco);
 
             await increaseTimeTo(icoOpeningTime + tenSeconds);

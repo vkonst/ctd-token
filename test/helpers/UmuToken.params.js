@@ -32,10 +32,26 @@ const awards = {
     closing:    (new BigNumber(0.5)).mul(1e18)
 };
 
+const maxPreIcoAPhaseWei = tokenQtyLimits.preIco
+    .div(tokenRates.preIcoA.total)
+    .toNumber();
+
+const maxPreIcoBPhaseWei = (tokenQtyLimits.total.sub(tokenQtyLimits.preIco))
+    .div(tokenRates.preIcoB.total)
+    .toNumber();
+
+const maxIcoPhaseWei = (tokenQtyLimits.total.sub(tokenQtyLimits.preIco))
+    .div(tokenRates.mainIco.total)
+    .toNumber();
+
+
 export default {
     awards,
     durationLimits,
     icoPhases,
+    maxIcoPhaseWei,
+    maxPreIcoAPhaseWei,
+    maxPreIcoBPhaseWei,
     tokenQtyLimits,
     tokenRates
 };

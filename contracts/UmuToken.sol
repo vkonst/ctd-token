@@ -239,7 +239,6 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
 
         withdrawal(msg.sender, shiftAward);
         NewPhase(phase);
-        Withdrawal(msg.sender, shiftAward);
     }
 
     function transfer(address _to, uint256 _value)

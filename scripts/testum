@@ -1,0 +1,113 @@
+#!/bin/bash
+# file: ./testum
+set -e
+
+if ! [[ "$1" =~ ^(stop|start|restart|init|clean|purge|mine|update-enodes)$ ]]; then
+  echo
+  echo "Usage: testum [stop|start|restart|init|clean|purge|mine|update-enodes [0|1|2|3]]"
+  echo
+  echo "Manage [node(s) on] the private ethereum network (for root/sudoer)"
+  echo "ex.:"
+  echo " # Create (re-create) a network:"
+  echo "   testum init; testum update-enodes; testum restart"
+  echo " # Start mining on node 3"
+  echo "   testum mine 3"
+  echo " # Stop node 1 and 2"
+  echo "   testnum stop \"1 2\""
+  echo
+  exit
+fi;
+
+cmd=$1
+shift
+
+[ -z "$*" ] && nodes="$(seq 0 3)" || nodes="$*"
+
+echo "[*] command: ${cmd}"
+echo "[*] nodes:   ${nodes}"
+
+tmpfile="/tmp/geth.static-nodes.tmp"
+rm -f ${tmpfile}
+
+for i in ${nodes}; do
+
+  if [[ "${cmd}" =~ ^(restart|init|stop|clean|purge)$ ]]; then
+    echo "[*] node ${i}: stoping and cleaning pipe ..."
+
+    set +e; docker stop e${i} > /dev/null 2>&1; set -e;
+    rm -f /var/docker-volumes/vol1/host${i}/root/.ethereum/geth.ipc
+  fi;
+
+  if [[ "${cmd}" =~ ^(restart|init|clean)$ ]]; then
+    echo "[*] node ${i}: removing image ..."
+
+    cnt=$(docker ps -aq --filter name=e${i});
+    [ ! -z ${cnt} ] && docker rm ${cnt};
+  fi;
+
+  if [[ "${cmd}" =~ ^(init|purge)$ ]]; then
+    echo "[*] node ${i}: deleting DBase and cache ..."
+
+    rm --force --recursive /var/docker-volumes/vol1/host${i}/root/.ethereum/geth
+    rm --force --recursive /var/docker-volumes/vol1/host${i}/root/.ethash
+  fi;
+
+  if [[ "${cmd}" =~ ^(init)$ ]]; then 
+    echo "[*] node ${i}: DBase re-initialization ..."
+
+    docker run --name e${i} -v /var/docker-volumes/vol1/host${i}/root/:/root/ \
+      ethereum/client-go init /root/.ethereum/genesis.json
+    cnt=$(docker ps -aq --filter name=e${i});
+    [ ! -z ${cnt} ] && docker rm ${cnt};
+  fi;
+
+  if [[ "${cmd}" =~ ^(start|restart)$ ]]; then
+    echo "[*] node ${i}: starting ..."
+
+    rpcport=$((8545+${i}));
+    discport=3031${i};
+    # ? --verbosity 4 --nodiscover --rpccorsdomain --network=2023
+    docker run --name e${i} -v /var/docker-volumes/vol1/host${i}/root/:/root/ \
+      -dt -p 127.0.0.1:${rpcport}:8545 --expose ${discport} \
+      ethereum/client-go --identity=e${i} --datadir=/root/.ethereum/ \
+        --verbosity=4 --maxpeers=3 --port ${discport} --nodiscover \
+        --rpc --rpcaddr 0.0.0.0 --rpcport 8545 --rpccorsdomain "*" \
+        --rpcapi=db,eth,net,web3,personal,shh \
+        console
+     sleep 5;
+  fi;
+
+  if [[ "${cmd}" =~ ^(update-enodes)$ ]]; then
+    echo "[*] node ${i}: obtaining enode..."
+
+    ipaddr=$(docker container inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' e${i})
+    enode=$(docker exec -it e${i} geth attach --exec admin.nodeInfo.enode)
+    enode=${enode/\[::\]/${ipaddr}}
+    if [ ! -z ${enode} ]; then
+      [ -f ${tmpfile} ] && echo ',' >> ${tmpfile} || echo '[' >> ${tmpfile};
+      # remove xterm control symbols while writing into file
+      echo -n ${enode} | sed -e "s/\x0d//" -e "s/\x1b\[.\{1,5\}m//g" >> ${tmpfile}
+    fi;
+  fi;
+
+  if [[ "${cmd}" =~ ^(mine)$ ]]; then
+    echo "[*] node ${i}: starting mining..."
+    docker exec -it e${i} geth attach --exec \
+      "miner.stop(); web3.miner.setEtherbase(eth.accounts[${i}]); miner.start(); eth.mining;"
+  fi;
+
+done;
+
+if [ -f ${tmpfile} ]; then
+  echo >> ${tmpfile}
+  echo ']' >> ${tmpfile}
+  for i in ${nodes}; do
+    echo "[*] node ${i}: generating static-nodes.json"
+
+    nodesFile=/var/docker-volumes/vol1/host${i}/root/.ethereum/geth/static-nodes.json
+    cp -f ${tmpfile} ${nodesFile}
+  done;
+fi;
+
+echo "[*] done. running containers:"
+docker ps -q

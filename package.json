@@ -20,7 +20,7 @@
     "ERC20"
   ],
   "author": "{name: Vadim Konstantinov, email:vadim.konstantinov@gmail.com}",
-  "license": "",
+  "license": "MIT",
   "homepage": "https://bitbucket.org/konstantinovv/umu-ico",
   "devDependencies": {
     "babel-polyfill": "^6.26.0",
@@ -29,6 +29,7 @@
     "babel-preset-stage-3": "^6.24.1",
     "babel-register": "^6.26.0",
     "bignumber.js": "^4.0.4",
+    "truffle-contract": "^3.0.0",
     "web3": "^1.0.0-beta.22"
   }
 }

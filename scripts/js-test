@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# file: .test/js-test
+
+if [ -z "$1" ]; then
+  echo
+  echo "Dirty way around to run 'truffle test test/<pattern>.spec.js'"
+  echo " Before running the command it renames files in the test folder"
+  echo " from test/<pattern>.spec.js into test/<pattern>.spec.js.off"
+  echo " usage: js-test <pattern>";
+  echo " example: js-tests on *Token"
+  echo
+  exit
+fi;
+
+./scripts/set_js-tests off
+./scripts/set_js-tests on "$1"
+
+truffle test $2
+
+

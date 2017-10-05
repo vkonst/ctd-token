@@ -1,10 +1,12 @@
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 
+/*global artifacts, assert, beforeEach, afterEach*/
+
 const OwnableMock = artifacts.require('./helpers/UmuTokenMock.sol');
 
 
-contract('Ownable', (accounts) => {
+contract('UmuToken is Ownable', (accounts) => {
     let ownable;
 
     let owner = accounts[0];

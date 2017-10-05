@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+if ! [[ "$1" =~ ^(on|off|toggle) ]]; then
+  echo
+  echo "rename test/*<pattern>.spec.js into test/*<pattern>.spec.js.off and back";
+  echo " usage: set_js-tests on|off|toggle [pattern]";
+  echo " pattern - optional ('' by default)"
+  echo " example: set_js-tests on *token"
+  echo
+  exit
+fi;
+
+cmd=$1
+
+[ -z ${2} ] && suffix='' || suffix="${2}";
+pattern="test/*${suffix}.spec.js"
+
+echo "command: ${cmd}"
+echo "pattern: ${pattern}"
+
+
+if [[ "${cmd}" =~ "off" ]]; then
+  for f in $(ls -1 ${pattern}); do
+    mv -v "${f}" "${f}.off";
+  done;
+fi;
+
+if [[ "${cmd}" =~ "on" ]]; then
+  for f in $(ls -1 ${pattern}.off); do
+    mv -v "${f}" "${f/.off/}";
+  done;
+fi;
+
+if [[ "${cmd}" =~ "toggle" ]]; then
+  toOn="$(ls -1 ${pattern}.off)";
+  toOff="$(ls -1 ${pattern})";
+
+  for f in $toOn;  do
+    mv -v "${f}" "${f/.off/}";
+  done;
+
+  for f in $toOff; do
+    mv -v -n "${f}" "${f}.off";
+  done;
+fi;

@@ -1,9 +1,9 @@
-'use strict';
-
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 import params from './helpers/UmuToken.params';
+
+/*global artifacts, assert, beforeEach, afterEach*/
 
 const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
 
@@ -12,7 +12,6 @@ let DUMP = false;
 contract('UmuToken Phases', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime, icoClosingTime;
 
-    let owner = accounts[0];
     let buyer = accounts[1];
 
     const OneWei = 1;

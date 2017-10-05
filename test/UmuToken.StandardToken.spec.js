@@ -1,11 +1,11 @@
-'use strict';
-
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 
-const StandardTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+/*global artifacts, assert, beforeEach, afterEach*/
 
-contract('StandardToken', (accounts) => {
+const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+
+contract('UmuToken is StandardToken', (accounts) => {
     let token;
 
     let owner = accounts[0];
@@ -18,7 +18,7 @@ contract('StandardToken', (accounts) => {
         const tenSeconds = 10;
         const timeNow = await latestTime();
         const preIcoOpeningTime = timeNow + tenSeconds;
-        token = await StandardTokenMock.new(preIcoOpeningTime);
+        token = await UmuTokenMock.new(preIcoOpeningTime);
         await token.simulateNewTokens(transferor, tokensOnSale);
 
         assert.equal((await token.getTokenBalanceOf(transferor)).toNumber(), tokensOnSale);

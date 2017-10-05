@@ -1,13 +1,11 @@
-'use strict';
-
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 import params from './helpers/UmuToken.params';
 
-const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+/*global artifacts, assert, beforeEach, afterEach*/
 
-let DUMP = false;
+const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
 
 contract('UmuToken Pre-ICO Phase A', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime, icoClosingTime;
@@ -63,7 +61,6 @@ contract('UmuToken Pre-ICO Phase A', (accounts) => {
             let actualBalance = (await token.getBalanceAt(owner)).toNumber();
             let expectedBalance = beforeOwnerEthBalance.add(OneEth).toNumber();
             assert.equal(actualBalance, expectedBalance);
-            if (DUMP) await dump('*** =should add 1 Ether to the owner account');
         });
 
     });
@@ -193,25 +190,6 @@ contract('UmuToken Pre-ICO Phase A', (accounts) => {
         let phase = await token.phase.call();
         let actualPhase = (typeof phase === 'number') ? phase : phase.toNumber();
         assert.equal(actualPhase, expectedPhase);
-    }
-
-    async function dump(msg) {
-        let timeNow = await latestTime();
-
-        if (msg) console.warn(msg);
-        console.warn('time: ' +
-            (timeNow >= icoClosingTime    ? ('icoClosed + ' + (timeNow - icoClosingTime))    :
-                (timeNow >= icoOpeningTime    ? ('icoOpened + ' + (timeNow - icoOpeningTime))    :
-                        (timeNow >= preIcoOpeningTime ? ('preOpened + ' + (timeNow - preIcoOpeningTime)) :
-                            (timeNow - preIcoOpeningTime))
-                )));
-        console.warn('phase: ' + await token.phase.call());
-        console.warn('totalSupply  [Atoms]: ' + (await token.totalSupply.call()));
-        console.warn('tokensBuyer  [Atoms]: ' + (await token.getTokenBalanceOf.call(buyer)));
-        console.warn('tokensOwner  [Atoms]: ' + (await token.getTokenBalanceOf.call(owner)));
-        console.warn('tokensBounty [Atoms]: ' + (await token.getTokenBalanceOf.call(bounty)));
-        console.warn('totalProceeds  [Wei]: ' + (await token.totalProceeds.call()));
-        console.warn('ethOwner       [Wei]: ' + (await token.getBalanceAt(owner)).sub(beforeOwnerEthBalance));
     }
 
     function toUmu(atoms) {

@@ -1,9 +1,9 @@
-'use strict';
-
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 import params from './helpers/UmuToken.params';
+
+/*global artifacts, assert, beforeEach, afterEach*/
 
 const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
 

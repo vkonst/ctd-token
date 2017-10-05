@@ -1,16 +1,11 @@
 nmp init
 sudo npm i -g truffle
 sudo npm i -g solium
-
-sudo
-npm i --save-dev zeppelin-solidity
-npm i --save-dev bignumber.js
-
-# init & generate test contracts
-truffle init
+sudo npm i -g ethereumjs-testrpc
+sudo npm i -g truffle-soljs-updater
 
 # lint solidity code
- solium --dir contracts/
+solium --dir contracts/
 
 # compile contracts
 truffle compile
@@ -30,3 +25,26 @@ truffle migrate
 # TODO: to review https://github.com/TokenMarketNet/ico/tree/master/contract
 
 `https://eprint.iacr.org/2016/1007.pdf`
+
+
+# Consider for truffls.js:
+/*
+    build_directory: function() {
+      return path.join(self.working_directory, "build");
+    },
+    contracts_directory: function() {
+      return path.join(self.working_directory, "contracts");
+    },
+    contracts_build_directory: function() {
+      return path.join(self.build_directory, "contracts");
+    },
+    migrations_directory: function() {
+      return path.join(self.working_directory, "migrations");
+    },
+    test_directory: function() {
+      return path.join(self.working_directory, "test");
+    },
+    test_file_extension_regexp: function() {
+      return /.*\.(js|es|es6|jsx|sol)$/
+    }
+*/

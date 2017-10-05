@@ -1,3 +1,4 @@
+/*global module*/
 module.exports = function(deployer) {
     "use strict";
 
@@ -11,4 +12,7 @@ module.exports = function(deployer) {
     // console.warn("*** UmuToken    .binary.length :" + UmuToken.binary.length);
     // deployer.deploy(UmuToken, preIcoOpeningTime);
 
+    // const UmuTokenMock = artifacts.require('../test/helpers/UmuTokenMock.sol');
+    // console.warn("*** UmuTokenMock.binary.length :" + UmuTokenMock.binary.length);
+    // deployer.deploy(UmuTokenMock, preIcoOpeningTime);
 };

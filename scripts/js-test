@@ -6,15 +6,21 @@ if [ -z "$1" ]; then
   echo "Dirty way around to run 'truffle test test/<pattern>.spec.js'"
   echo " Before running the command it renames files in the test folder"
   echo " from test/<pattern>.spec.js into test/<pattern>.spec.js.off"
-  echo " usage: js-test <pattern>";
-  echo " example: js-tests on *Token"
+  echo " usage: js-test <pattern>|\"<pattern1> <pattern2> <pattern...>\"";
+  echo " example: js-tests on Token"
   echo
   exit
 fi;
 
-./scripts/set_js-tests off
-./scripts/set_js-tests on "$1"
+patterns="$1"
+options="$2"
 
-truffle test $2
+function runTest {
+  ./scripts/set_js-tests off
+  ./scripts/set_js-tests on "$1"
+  truffle test $2
+}
 
-
+for pattern in $1; do
+  runTest "${pattern}" "${options}"
+done

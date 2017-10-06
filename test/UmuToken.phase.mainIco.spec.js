@@ -2,12 +2,11 @@ import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 import params from './helpers/UmuToken.params';
+import {DUMP, dumper, toUmu} from "./helpers/UmuToken.utils";
 
 /*global artifacts, assert, beforeEach, afterEach*/
 
 const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
-
-let DUMP = false;
 
 contract('UmuToken Main ICO Phase', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime, icoClosingTime;
@@ -22,6 +21,8 @@ contract('UmuToken Main ICO Phase', (accounts) => {
     const OneEth = 1e18;
     const tenSeconds = 10;
 
+    let dump;
+
     beforeEach(async () => {
         const timeNow = await latestTime();
         preIcoOpeningTime = timeNow + 6*tenSeconds;
@@ -30,6 +31,10 @@ contract('UmuToken Main ICO Phase', (accounts) => {
 
         token = await UmuTokenMock.new(preIcoOpeningTime);
         await token.setBounty(bounty);
+
+        if (DUMP) {
+            dump = await dumper(token, {owner, buyer, bounty, stranger});
+        }
     });
 
     beforeEach(async () => {
@@ -204,30 +209,6 @@ contract('UmuToken Main ICO Phase', (accounts) => {
         let phase = await token.phase.call();
         let actualPhase = (typeof phase === 'number') ? phase : phase.toNumber();
         assert.equal(actualPhase, expectedPhase);
-    }
-
-    async function dump(msg) {
-        let timeNow = await latestTime();
-
-        if (msg) console.warn(msg);
-        console.warn('time: ' +
-            (timeNow >= icoClosingTime    ? ('icoClosed + ' + (timeNow - icoClosingTime))    :
-                (timeNow >= icoOpeningTime    ? ('icoOpened + ' + (timeNow - icoOpeningTime))    :
-                        (timeNow >= preIcoOpeningTime ? ('preOpened + ' + (timeNow - preIcoOpeningTime)) :
-                            (timeNow - preIcoOpeningTime))
-                )));
-        console.warn('phase: ' + await token.phase.call());
-        console.warn('totalSupply  [Atoms]: ' + (await token.totalSupply.call()));
-        console.warn('tokensBuyer  [Atoms]: ' + (await token.getTokenBalanceOf.call(buyer)));
-        console.warn('tokensOwner  [Atoms]: ' + (await token.getTokenBalanceOf.call(owner)));
-        console.warn('tokensBounty [Atoms]: ' + (await token.getTokenBalanceOf.call(bounty)));
-        console.warn('totalProceeds  [Wei]: ' + (await token.totalProceeds.call()));
-        console.warn('ethOwner       [Wei]: ' + (await token.getBalanceAt(owner)).sub(beforeOwnerEthBalance));
-    }
-
-    function toUmu(atoms) {
-        let bigAtoms = (typeof atoms === 'number') ? (new BigNumber(atoms)) : atoms;
-        return bigAtoms.div(1e18).toNumber();
     }
 
 });

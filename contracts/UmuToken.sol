@@ -107,7 +107,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
 
         Phases oldPhase = phase;
         uint256 weiToParticipate = msg.value;
-        uint256 overpaidWei = 0;
+        uint256 overpaidWei;
 
         adjustPhaseBasedOnTime();
 
@@ -118,8 +118,9 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
             uint256 requestedSupply = totalSupply.add(newTokens);
 
             uint256 oversoldTokens = computeOversoldAndAdjustPhase(requestedSupply);
-            if (oversoldTokens > 0) {
-                overpaidWei = oversoldTokens.div(rates.total);
+            overpaidWei = (oversoldTokens > 0) ? oversoldTokens.div(rates.total) : 0;
+
+            if (overpaidWei > 0) {
                 weiToParticipate = msg.value.sub(overpaidWei);
                 newTokens = weiToParticipate.mul(uint256(rates.total));
                 requestedSupply = totalSupply.add(newTokens);

@@ -42,8 +42,7 @@ const maxIcoPhaseWei = (tokenQtyLimits.total.sub(tokenQtyLimits.preIco))
     .div(tokenRates.mainIco.total)
     .toNumber();
 
-
-export default {
+const params = {
     awards,
     durationLimits,
     icoPhases,
@@ -53,3 +52,5 @@ export default {
     tokenQtyLimits,
     tokenRates
 };
+
+export default params;

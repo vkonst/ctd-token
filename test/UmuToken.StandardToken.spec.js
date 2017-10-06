@@ -134,7 +134,7 @@ contract('UmuToken is StandardToken', (accounts) => {
 
             beforeEach(async () => {
                 await token.approve(transferee, payableTokens, {from: transferor});
-                let allowance = await token.getTokenAllowance(transferor, transferee);
+                let allowance = await token.allowance.call(transferor, transferee);
                 assert.equal(allowance.toNumber(), payableTokens);
             });
 
@@ -210,7 +210,7 @@ contract('UmuToken is StandardToken', (accounts) => {
         it('should set the correct allowance and return true', async () => {
             let result = await token.approve.call(transferee, payableTokens, {from: transferor});
             await token.approve(transferee, payableTokens, {from: transferor});
-            let allowance = await token.getTokenAllowance(transferor, transferee);
+            let allowance = await token.allowance.call(transferor, transferee);
             assert(result);
             assert.equal(allowance.toNumber(), payableTokens);
         });
@@ -230,14 +230,14 @@ contract('UmuToken is StandardToken', (accounts) => {
         const payableTokens = tokensOnSale - 2;
 
         it('should return zero allowance before approval', async () => {
-            let allowance = await token.allowance(transferor, transferee);
+            let allowance = await token.allowance.call(transferor, transferee);
             assert.equal(allowance, 0);
         });
 
         it('should return the correct allowance after approval', async function() {
             await token.approve(transferee, payableTokens, {from: transferor});
 
-            let allowance = await token.allowance(transferor, transferee);
+            let allowance = await token.allowance.call(transferor, transferee);
             assert.equal(allowance.toNumber(), payableTokens);
         });
     });
@@ -249,14 +249,14 @@ contract('UmuToken is StandardToken', (accounts) => {
 
         beforeEach(async () => {
             await token.approve(transferee, payableTokens, {from: transferor});
-            let allowance = await token.getTokenAllowance(transferor, transferee);
+            let allowance = await token.allowance.call(transferor, transferee);
             result = await token.increaseApproval.call(transferee, extraTokens, {from: transferor});
             tx = await token.increaseApproval(transferee, extraTokens, {from: transferor});
             assert.equal(allowance.toNumber(), payableTokens);
         });
 
         it('should increase allowance and return true', async () => {
-            let allowance = await token.getTokenAllowance(transferor, transferee);
+            let allowance = await token.allowance.call(transferor, transferee);
             assert(result);
             assert.equal(allowance.toNumber(), payableTokens + extraTokens);
         });
@@ -279,7 +279,7 @@ contract('UmuToken is StandardToken', (accounts) => {
 
         beforeEach(async () => {
             await token.approve(transferee, payableTokens, {from: transferor});
-            let allowance = await token.getTokenAllowance(transferor, transferee);
+            let allowance = await token.allowance.call(transferor, transferee);
             result = await token.decreaseApproval.call(transferee, extraTokens, {from: transferor});
             tx = await token.decreaseApproval(transferee, extraTokens, {from: transferor});
 
@@ -287,7 +287,7 @@ contract('UmuToken is StandardToken', (accounts) => {
         });
 
         it('should decrease allowance and return true', async () => {
-            let allowance = await token.getTokenAllowance(transferor, transferee);
+            let allowance = await token.allowance.call(transferor, transferee);
 
             assert(result);
             assert.equal(allowance.toNumber(), payableTokens - extraTokens);
@@ -295,7 +295,7 @@ contract('UmuToken is StandardToken', (accounts) => {
 
         it('should set allowance to 0 if decrease exceeds available amount', async () => {
             await token.decreaseApproval(transferee, payableTokens - extraTokens + 1, {from: transferor});
-            let allowance = await token.getTokenAllowance(transferor, transferee);
+            let allowance = await token.allowance.call(transferor, transferee);
 
             assert.equal(allowance.toNumber(), 0);
         });
@@ -315,13 +315,13 @@ contract('UmuToken is StandardToken', (accounts) => {
     describe('transactions sequence', async () => {
 
         it('should increase allowance by 50 then decrease by 10', async () => {
-            let preApproved = await token.getTokenAllowance(transferor, transferee);
+            let preApproved = await token.allowance.call(transferor, transferee);
 
             await token.increaseApproval(transferee, 50, {from: transferor});
-            let postIncrease = await token.allowance(transferor, transferee);
+            let postIncrease = await token.allowance.call(transferor, transferee);
 
             await token.decreaseApproval(transferee, 10, {from: transferor});
-            let postDecrease = await token.allowance(transferor, transferee);
+            let postDecrease = await token.allowance.call(transferor, transferee);
 
             assert.equal(preApproved + 50, postIncrease.toNumber());
             assert.equal(postIncrease - 10, postDecrease.toNumber());

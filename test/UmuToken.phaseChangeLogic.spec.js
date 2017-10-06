@@ -2,21 +2,26 @@ import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 import params from './helpers/UmuToken.params';
+import {DUMP, dumper, toUmuMio} from "./helpers/UmuToken.utils";
 
 /*global artifacts, assert, beforeEach, afterEach*/
 
 const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
 
-let DUMP = false;
-
 contract('UmuToken Phases', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime, icoClosingTime;
 
+    let owner = accounts[0];
     let buyer = accounts[1];
 
     const OneWei = 1;
     const OneEth = 1e18;
     const tenSeconds = 10;
+
+    const preIcoLimitMio = toUmuMio(params.tokenQtyLimits.preIco);
+    const allIcoLimitMio = toUmuMio(params.tokenQtyLimits.total);
+
+    let dump;
 
     beforeEach(async () => {
         const timeNow = await latestTime();
@@ -24,6 +29,11 @@ contract('UmuToken Phases', (accounts) => {
         icoOpeningTime = preIcoOpeningTime + params.durationLimits.preIco;
         icoClosingTime = icoOpeningTime + params.durationLimits.mainIco;
         token = await UmuTokenMock.new(preIcoOpeningTime);
+
+        if (DUMP) {
+            dump = await dumper(token, {owner, buyer});
+        }
+
     });
 
     describe('Phase of the Campaign', async () => {
@@ -46,7 +56,7 @@ contract('UmuToken Phases', (accounts) => {
     describe('Pre-start Phase', async () => {
 
         beforeEach(async () => {
-            await dump('*** >0.x');
+            if (DUMP) await dump('*** >0.x');
         });
 
         it('should start on contract deployment', async () => {
@@ -58,7 +68,7 @@ contract('UmuToken Phases', (accounts) => {
             await expectThrows(callCreate({value: OneWei}));
 
             await checkPhase(params.icoPhases.preStart);
-            await dump('*** =0.1');
+            if (DUMP) await dump('*** =0.1');
         });
 
         it('should switch to "Pre-ICO Phase A" at the "preIcoOpeningTime"', async () => {
@@ -67,7 +77,7 @@ contract('UmuToken Phases', (accounts) => {
 
             await callCreate({value: OneWei});
             await checkPhase(params.icoPhases.preIcoA);
-            await dump('*** =0.2');
+            if (DUMP) await dump('*** =0.2');
         });
 
         it('should switch to "Main ICO" on first call of create() after "icoOpeningTime"', async () => {
@@ -76,7 +86,7 @@ contract('UmuToken Phases', (accounts) => {
 
             await callCreate({value: OneWei});
             await checkPhase(params.icoPhases.mainIco);
-            await dump('*** =0.3');
+            if (DUMP) await dump('*** =0.3');
         });
 
         it('should switch to "After ICO" on first call of create() after "icoClosingTime"', async () => {
@@ -85,7 +95,7 @@ contract('UmuToken Phases', (accounts) => {
 
             await callCreate({value: OneWei});
             await checkPhase(params.icoPhases.afterIco);
-            await dump('*** =0.4');
+            if (DUMP) await dump('*** =0.4');
         });
 
     });
@@ -97,29 +107,29 @@ contract('UmuToken Phases', (accounts) => {
             await callCreate({value: OneWei});
 
             await checkPhase(params.icoPhases.preIcoA);
-            await dump('*** >1.x');
+            if (DUMP) await dump('*** >1.x');
         });
 
-        it('should switch to "Phase B" if PRE_ICO_LIMIT tokens sold out before "icoOpeningTime"', async () => {
+        it(`should switch to "Phase B" if ${preIcoLimitMio}M tokens sold out before "icoOpeningTime"`, async () => {
             await callCreate({value: params.maxIcoPhaseWei + OneEth});
             await checkPhase(params.icoPhases.preIcoB);
-            await dump('*** =1.1');
+            if (DUMP) await dump('*** =1.1');
         });
 
-        it('should switch to "(Main) ICO" at "icoOpeningTime" if PRE_ICO_LIMIT tokens unsold', async () => {
+        it(`should switch to "(Main) ICO" at "icoOpeningTime" if ${preIcoLimitMio}M tokens unsold`, async () => {
             await increaseTimeTo(icoOpeningTime + tenSeconds);
             await callCreate({value: OneWei});
 
             await checkPhase(params.icoPhases.mainIco);
-            await dump('*** =1.2');
+            if (DUMP) await dump('*** =1.2');
         });
 
-        it('should NOT switch before "icoOpeningTime" if PRE_ICO_LIMIT tokens unsold', async () => {
+        it(`should NOT switch before "icoOpeningTime" if ${preIcoLimitMio}M tokens unsold`, async () => {
             await increaseTimeTo(icoOpeningTime - tenSeconds);
             await callCreate({value: OneWei});
 
             await checkPhase(params.icoPhases.preIcoA);
-            await dump('*** =1.3');
+            if (DUMP) await dump('*** =1.3');
         });
 
     });
@@ -131,29 +141,29 @@ contract('UmuToken Phases', (accounts) => {
             await callCreate({from: buyer, value: params.maxIcoPhaseWei + OneEth});
 
             await checkPhase(params.icoPhases.preIcoB);
-            await dump('*** 2.x');
+            if (DUMP) await dump('*** 2.x');
         });
 
-        it('should switch to "After ICO" if "ICO_LIMIT" tokens sold out before "icoOpeningTime"', async () => {
+        it(`should switch to "After ICO" if ${allIcoLimitMio}M tokens sold out before "icoOpeningTime"`, async () => {
             await callCreate({from: buyer, value: params.maxPreIcoBPhaseWei + OneEth});
             await checkPhase(params.icoPhases.afterIco);
-            await dump('*** =2.1');
+            if (DUMP) await dump('*** =2.1');
         });
 
-        it('should switch to "(Main) ICO" at "icoOpeningTime" if ICO_LIMIT tokens unsold', async () => {
+        it(`should switch to "(Main) ICO" at "icoOpeningTime" if ${allIcoLimitMio}M tokens unsold`, async () => {
             await increaseTimeTo(icoOpeningTime + tenSeconds);
             await callCreate({value: OneWei});
 
             await checkPhase(params.icoPhases.mainIco);
-            await dump('*** =2.2');
+            if (DUMP) await dump('*** =2.2');
         });
 
-        it('should NOT switch before "icoOpeningTime" if ICO_LIMIT tokens unsold', async () => {
+        it(`should NOT switch before "icoOpeningTime" if ${allIcoLimitMio}M tokens unsold`, async () => {
             await increaseTimeTo(icoOpeningTime - tenSeconds);
             await callCreate({value: OneWei});
 
             await checkPhase(params.icoPhases.preIcoB);
-            await dump('*** =2.3');
+            if (DUMP) await dump('*** =2.3');
         });
 
     });
@@ -166,41 +176,41 @@ contract('UmuToken Phases', (accounts) => {
             await callCreate(OneWei);
 
             await checkPhase(params.icoPhases.mainIco);
-            await dump('*** >3.x');
+            if (DUMP) await dump('*** >3.x');
         });
 
 
-        it('should switch to "After ICO" if ICO_LIMIT tokens sold out before "icoClosingTime"', async () =>  {
+        it(`should switch to "After ICO" if ${allIcoLimitMio}M tokens sold out before "icoClosingTime"`, async () =>  {
             await callCreate({from: buyer, value: params.maxPreIcoBPhaseWei + params.maxIcoPhaseWei + OneEth});
             await checkPhase(params.icoPhases.afterIco);
-            await dump('*** =3.1');
+            if (DUMP) await dump('*** =3.1');
         });
 
-        it('should NOT switch before "icoClosingTime" if ICO_LIMIT tokens unsold', async () =>  {
+        it(`should NOT switch before "icoClosingTime" if ${allIcoLimitMio}M tokens unsold`, async () =>  {
             await increaseTimeTo(icoClosingTime - tenSeconds);
             await callCreate({value: OneWei});
 
             await checkPhase(params.icoPhases.mainIco);
-            await dump('*** =3.2');
+            if (DUMP) await dump('*** =3.2');
         });
 
-        it('should switch to "After ICO" at "icoClosingTime" if ICO_LIMIT tokens unsold', async () => {
+        it(`should switch to "After ICO" at "icoClosingTime" if ${allIcoLimitMio}M tokens unsold`, async () => {
             await increaseTimeTo(icoClosingTime + tenSeconds);
             await callCreate({value: OneWei});
 
             await checkPhase(params.icoPhases.afterIco);
-            await dump('*** =3.3');
+            if (DUMP) await dump('*** =3.3');
         });
     });
 
     describe('After-ICO Phase', async () => {
 
         beforeEach(async () => {
-            await dump('*** >4.x');
+            if (DUMP) await dump('*** >4.x');
         });
 
 
-        it('should never end if ICO_LIMIT tokens sold out', async () =>  {
+        it(`should never end if ${allIcoLimitMio}M tokens sold out`, async () =>  {
             await increaseTimeTo(preIcoOpeningTime + tenSeconds);
             await callCreate({from: buyer, value: params.maxPreIcoBPhaseWei + params.maxIcoPhaseWei + OneEth});
             await checkPhase(params.icoPhases.afterIco);
@@ -212,7 +222,7 @@ contract('UmuToken Phases', (accounts) => {
             await increaseTimeTo(icoClosingTime + tenSeconds);
             await expectThrows(callCreate({value: OneWei}));
             await checkPhase(params.icoPhases.afterIco);
-            await dump('*** =4.1');
+            if (DUMP) await dump('*** =4.1');
         });
 
         it('should never end after "icoClosingTime"', async () =>  {
@@ -220,7 +230,7 @@ contract('UmuToken Phases', (accounts) => {
             callCreate({value: OneEth});
 
             await checkPhase(params.icoPhases.afterIco);
-            await dump('*** =4.2');
+            if (DUMP) await dump('*** =4.2');
         });
 
     });
@@ -233,25 +243,6 @@ contract('UmuToken Phases', (accounts) => {
 
     async function callCreate({from = buyer, value = OneWei}) {
         await token.create({from, value});
-    }
-
-    async function dump(msg, _address = buyer) {
-        if (!DUMP) return;
-
-        let timeNow = await latestTime();
-
-        if (msg) console.warn(msg);
-        console.warn('time: ' +
-            (timeNow >= icoClosingTime    ? ('icoClosed + ' + (timeNow - icoClosingTime))    :
-            (timeNow >= icoOpeningTime    ? ('icoOpened + ' + (timeNow - icoOpeningTime))    :
-            (timeNow >= preIcoOpeningTime ? ('preOpened + ' + (timeNow - preIcoOpeningTime)) :
-                                                              (timeNow - preIcoOpeningTime))
-        )));
-        console.warn('phase: ' + await token.phase.call());
-        console.warn('address: ' + (_address === buyer ? 'buyer' : _address));
-        console.warn('totalSupply  [Atoms]]: ' + (await token.totalSupply.call()));
-        console.warn('totalProceeds   [Wei]: ' + (await token.totalProceeds.call()));
-        console.warn('tokenBalance [Atoms]]: ' + (await token.getTokenBalanceOf.call(_address)));
     }
 
 });

@@ -24,10 +24,6 @@ contract UmuTokenMock is UmuToken {
         return balances[_owner];
     }
 
-    function getTokenAllowance(address transferor, address transferee) public constant returns (uint256 tokens) {
-        return allowed[transferor][transferee];
-    }
-
     function testModifierOnlyOwner() onlyOwner public constant returns (bool) {
         return true;
     }

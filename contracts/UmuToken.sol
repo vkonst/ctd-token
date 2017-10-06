@@ -228,11 +228,11 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     function logShiftAndBookAward() internal {
         uint256 shiftAward;
 
-        if (phase == Phases.PreIcoA) {
-            shiftAward = ICO_OPENING_AWARD;
+        if ((phase == Phases.PreIcoA) || (phase == Phases.PreIcoB)) {
+            shiftAward = PRE_OPENING_AWARD;
 
         } else if (phase == Phases.MainIco) {
-            shiftAward = PRE_OPENING_AWARD;
+            shiftAward = ICO_OPENING_AWARD;
 
         } else {
             shiftAward = ICO_CLOSING_AWARD;

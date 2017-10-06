@@ -1,4 +1,5 @@
 import latestTime from '../lib/zeppelin-solidity/test/helpers/latestTime';
+const BigNumber = require('bignumber.js');
 
 export function toUmu(atoms) {
     let bigAtoms = (typeof atoms === 'number') ? (new BigNumber(atoms)) : atoms;

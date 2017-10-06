@@ -12,8 +12,8 @@ module.exports = {
     mocha: {
         useColors: true,
         slow: 30000,
-        bail: true,
-        grep: "UmuTokenMock", // "test",
+        // bail: true,
+        grep: "UmuTokenMock",
         invert: true
     },
     version: "0.0.1",

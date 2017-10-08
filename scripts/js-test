@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-# file: .test/js-test
+# file: test/js-test
 
 if [ -z "$1" ]; then
   echo
-  echo "Dirty way around to run 'truffle test test/<pattern>.spec.js'"
-  echo " Before running the command it renames files in the test folder"
-  echo " from test/<pattern>.spec.js into test/<pattern>.spec.js.off"
+  echo "Quick&Dirty way around to run 'truffle test test/<pattern>.spec.js'"
+  echo " Before running the command it renames files which are not tested"
+  echo " from test/*.spec.js into test/*.spec.js.off"
+  echo " and files which are under the test"
+  echo " from test/*.spec.js.off into test/*.spec.js"
+  echo
   echo " usage: js-test <pattern>|\"<pattern1> <pattern2> <pattern...>\"";
   echo " example: js-tests on Token"
   echo
@@ -21,6 +24,10 @@ function runTest {
   truffle test $2
 }
 
+[ -d "test/log/" ] || mkdir test/log/
+
 for pattern in $1; do
-  runTest "${pattern}" "${options}"
+  logfile=test/log/${pattern}.log
+  date | tee ${logfile}
+  runTest "${pattern}" "${options}" | tee -a ${logfile} 2>&1
 done

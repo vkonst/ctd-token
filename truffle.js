@@ -11,13 +11,13 @@ module.exports = {
     },
     gasPrice: 100e9,
     mocha: {
-        useColors: true,
+        useColors: false,
         slow: 30000,
         // bail: true,
         grep: "UmuTokenMock",
         invert: true
     },
-    version: "0.0.1",
+    version: "0.0.2",
     package_name: "umu-ico",
     description: "Smart-contracts for Umum ICO",
     license: "MIT"

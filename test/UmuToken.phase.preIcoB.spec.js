@@ -3,9 +3,10 @@ import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime'
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 import params from './helpers/UmuToken.params';
 
-/*global artifacts, assert, beforeEach, afterEach*/
+/*global artifacts, assert, beforeEach, afterEach, web3 */
 
 const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+const BigNumber = web3.BigNumber;
 
 contract('UmuToken Pre-ICO Phase B', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime, icoClosingTime;

@@ -1,5 +1,7 @@
 import latestTime from '../lib/zeppelin-solidity/test/helpers/latestTime';
-const BigNumber = require('bignumber.js');
+const BigNumber = web3.BigNumber;
+
+export const gasPrice = 100e9;
 
 export function toUmu(atoms) {
     let bigAtoms = (typeof atoms === 'number') ? (new BigNumber(atoms)) : atoms;
@@ -11,6 +13,25 @@ export function toUmuMio(atoms) {
 }
 
 export const DUMP = !!process.env.DUMP;
+
+export function dumpActVsExpect(actual, expected, msg) {
+    if (msg) console.warn(msg);
+    console.warn('  actual:' + actual);
+    console.warn('expected:' + expected);
+
+    if (typeof actual === 'number') {
+        console.warn('    diff:' + (actual - expected));
+    } else if (typeof actual.sub === 'function') {
+        console.warn('    diff:' + actual.sub(expected));
+    }
+}
+
+export function logEvents(tx, msg) {
+    if (msg) console.warn(msg);
+    if (!!tx.logs.length) {
+        tx.logs.map( log => { console.warn(JSON.stringify(log));});
+    }
+}
 
 export function dumper(deployed, roles) {
     let contract, times = {};
@@ -40,11 +61,12 @@ export function dumper(deployed, roles) {
             contract.phase.call(),
             contract.totalSupply.call(),
             contract.totalProceeds.call(),
+            contract.getBalance.call(),
             roles.owner ? contract.getBalanceAt.call(roles.owner) : 0,
             roles.owner ? contract.getTokenBalanceOf.call(roles.owner) : 0,
             roles.owner ? contract.testPendingWithdrawalAmount.call({from: roles.owner}) : 0,
-            roles.buyer ? contract.getTokenBalanceOf.call(roles.buyer) : 0,
             roles.buyer ? contract.getBalanceAt.call(roles.buyer) : 0,
+            roles.buyer ? contract.getTokenBalanceOf.call(roles.buyer) : 0,
             roles.buyer ? contract.testPendingWithdrawalAmount.call({from: roles.buyer}) : 0,
             roles.bounty ? contract.getBalanceAt.call(roles.bounty) : 0,
             roles.bounty ? contract.getTokenBalanceOf.call(roles.bounty) : 0,
@@ -69,6 +91,7 @@ export function dumper(deployed, roles) {
             v.phase,
             v.totalSupply,
             v.totalProceeds,
+            v.balanceContract,
             v.balanceOwner,
             v.tokenBalanceOfOwner,
             v.withdrawalOwner,
@@ -99,6 +122,7 @@ export function dumper(deployed, roles) {
         console.warn(`phase: ${v.phase}`);
         console.warn(`totalSupply    [Atoms]: ${v.totalSupply}`);
         console.warn(`totalProceeds    [Wei]: ${v.totalProceeds}`);
+        console.warn(`ethContract      [Wei]: ${v.balanceContract}`);
         if (buyer) {
             console.warn(`ethBuyer         [Wei]: ${v.balanceBuyer}`);
             console.warn(`tokensBuyer    [Atoms]: ${v.tokenBalanceOfBuyer}`);
@@ -121,4 +145,10 @@ export function dumper(deployed, roles) {
             console.warn(`wdrawalStranger  [Wei]: ${v.withdrawalStranger}`);
         }
     }
+}
+
+export function getTxGasCosts(tx, _gasPrice = gasPrice) {
+    let wei = (new BigNumber(tx.receipt.gasUsed)).mul(_gasPrice);
+    if (DUMP) console.warn('*gas  weis:' + wei);
+    return wei;
 }

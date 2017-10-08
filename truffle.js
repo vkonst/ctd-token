@@ -9,6 +9,7 @@ module.exports = {
             network_id: "*" // Match any network id
         }
     },
+    gasPrice: 100e9,
     mocha: {
         useColors: true,
         slow: 30000,

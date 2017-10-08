@@ -1,8 +1,8 @@
-const BigNumber = require('bignumber.js');
+const BigNumber = web3.BigNumber;
 
 const tokenQtyLimits = {
-    total:  (new BigNumber(650)).mul(1e6).mul(1e18),
-    preIco: (new BigNumber(130)).mul(1e6).mul(1e18)
+    total:  (new BigNumber("650e+24")),
+    preIco: (new BigNumber("130e+24"))
 };
 
 const durationLimits = {

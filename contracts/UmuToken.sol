@@ -38,17 +38,20 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     uint64 constant internal ICO_DURATION = 82 days;
 
     // Main ICO rate in UMU(s) per 1 ETH:
-    uint32 constant internal TO_SENDER_RATE   = 1000;
-    uint32 constant internal TO_OWNER_RATE    =  263;
-    uint32 constant internal TO_BOUNTY_RATE   =   52;
+    uint256 constant internal TO_SENDER_RATE   = 1000;
+    uint256 constant internal TO_OWNER_RATE    =  263;
+    uint256 constant internal TO_BOUNTY_RATE   =   52;
+    uint256 constant internal TOTAL_RATE   =   TO_SENDER_RATE + TO_OWNER_RATE + TO_BOUNTY_RATE;
     // Pre-ICO Phase A rate
-    uint32 constant internal TO_SENDER_RATE_A = 1150;
-    uint32 constant internal TO_OWNER_RATE_A  =  304;
-    uint32 constant internal TO_BOUNTY_RATE_A =   61;
+    uint256 constant internal TO_SENDER_RATE_A = 1150;
+    uint256 constant internal TO_OWNER_RATE_A  =  304;
+    uint256 constant internal TO_BOUNTY_RATE_A =   61;
+    uint256 constant internal TOTAL_RATE_A   =   TO_SENDER_RATE_A + TO_OWNER_RATE_A + TO_BOUNTY_RATE_A;
     // Pre-ICO Phase B rate
-    uint32 constant internal TO_SENDER_RATE_B = 1100;
-    uint32 constant internal TO_OWNER_RATE_B  =  292;
-    uint32 constant internal TO_BOUNTY_RATE_B =   58;
+    uint256 constant internal TO_SENDER_RATE_B = 1100;
+    uint256 constant internal TO_OWNER_RATE_B  =  292;
+    uint256 constant internal TO_BOUNTY_RATE_B =   58;
+    uint256 constant internal TOTAL_RATE_B   =   TO_SENDER_RATE_B + TO_OWNER_RATE_B + TO_BOUNTY_RATE_B;
 
     // Award in Wei(s) to a successful initiator of a Phase shift
     uint256 constant internal PRE_OPENING_AWARD = 100 * (10 ** uint256(15));
@@ -56,10 +59,10 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     uint256 constant internal ICO_CLOSING_AWARD = 500 * (10 ** uint256(15));
 
     struct Rates {
-        uint32 toSender;
-        uint32 toOwner;
-        uint32 toBounty;
-        uint32 total;
+        uint256 toSender;
+        uint256 toOwner;
+        uint256 toBounty;
+        uint256 total;
     }
 
     event NewTokens(uint256 amount);
@@ -114,7 +117,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
         if (phase != Phases.AfterIco) {
 
             Rates memory rates = getRates();
-            uint256 newTokens = weiToParticipate.mul(uint256(rates.total));
+            uint256 newTokens = weiToParticipate.mul(rates.total);
             uint256 requestedSupply = totalSupply.add(newTokens);
 
             uint256 oversoldTokens = computeOversoldAndAdjustPhase(requestedSupply);
@@ -122,15 +125,15 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
 
             if (overpaidWei > 0) {
                 weiToParticipate = msg.value.sub(overpaidWei);
-                newTokens = weiToParticipate.mul(uint256(rates.total));
+                newTokens = weiToParticipate.mul(rates.total);
                 requestedSupply = totalSupply.add(newTokens);
             }
 
             // "emission" of new tokens
             totalSupply = requestedSupply;
-            balances[msg.sender] = balances[msg.sender].add(weiToParticipate.mul(uint256(rates.toSender)));
-            balances[owner] = balances[owner].add(weiToParticipate.mul(uint256(rates.toOwner)));
-            balances[bounty] = balances[bounty].add(weiToParticipate.mul(uint256(rates.toBounty)));
+            balances[msg.sender] = balances[msg.sender].add(weiToParticipate.mul(rates.toSender));
+            balances[owner] = balances[owner].add(weiToParticipate.mul(rates.toOwner));
+            balances[bounty] = balances[bounty].add(weiToParticipate.mul(rates.toBounty));
 
             // ETH transfers
             totalProceeds = totalProceeds.add(weiToParticipate);
@@ -210,17 +213,17 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
             rates.toSender = TO_SENDER_RATE_A;
             rates.toOwner = TO_OWNER_RATE_A;
             rates.toBounty = TO_BOUNTY_RATE_A;
-            rates.total = TO_SENDER_RATE_A + TO_OWNER_RATE_A + TO_BOUNTY_RATE_A;
+            rates.total = TOTAL_RATE_A;
         } else if (phase == Phases.PreIcoB) {
             rates.toSender = TO_SENDER_RATE_B;
             rates.toOwner = TO_OWNER_RATE_B;
             rates.toBounty = TO_BOUNTY_RATE_B;
-            rates.total = TO_SENDER_RATE_B + TO_OWNER_RATE_B + TO_BOUNTY_RATE_B;
+            rates.total = TOTAL_RATE_B;
         } else {
             rates.toSender = TO_SENDER_RATE;
             rates.toOwner = TO_OWNER_RATE;
             rates.toBounty = TO_BOUNTY_RATE;
-            rates.total = TO_SENDER_RATE + TO_OWNER_RATE + TO_BOUNTY_RATE;
+            rates.total = TOTAL_RATE;
         }
         return rates;
     }

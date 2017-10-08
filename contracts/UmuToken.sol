@@ -191,14 +191,14 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
 
     function computeOversoldAndAdjustPhase(uint256 newTotalSupply) internal returns (uint256 oversoldTokens) {
 
-        if (newTotalSupply >= TOTAL_LIMIT) {
-            phase = Phases.AfterIco;
-            oversoldTokens = newTotalSupply.sub(TOTAL_LIMIT);
-
-        } else if ((phase == Phases.PreIcoA) &&
-                   (newTotalSupply >= PRE_ICO_LIMIT)) {
+        if ((phase == Phases.PreIcoA) &&
+            (newTotalSupply >= PRE_ICO_LIMIT)) {
             phase = Phases.PreIcoB;
             oversoldTokens = newTotalSupply.sub(PRE_ICO_LIMIT);
+
+        } else if (newTotalSupply >= TOTAL_LIMIT) {
+            phase = Phases.AfterIco;
+            oversoldTokens = newTotalSupply.sub(TOTAL_LIMIT);
 
         } else {
             oversoldTokens = 0;

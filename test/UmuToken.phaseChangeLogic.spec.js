@@ -13,6 +13,7 @@ contract('UmuToken Phases', (accounts) => {
 
     let owner = accounts[0];
     let buyer = accounts[1];
+    let stranger = accounts[3];
 
     const OneWei = 1;
     const OneEth = 1e18;
@@ -209,18 +210,20 @@ contract('UmuToken Phases', (accounts) => {
             if (DUMP) await dump('*** >4.x');
         });
 
-
         it(`should never end if ${allIcoLimitMio}M tokens sold out`, async () =>  {
-            await increaseTimeTo(preIcoOpeningTime + tenSeconds);
-            await callCreate({from: buyer, value: params.maxPreIcoBPhaseWei + params.maxIcoPhaseWei + OneEth});
-            await checkPhase(params.icoPhases.afterIco);
+            const allTokensWeiAtMainIcoRate = params.tokenQtyLimits.total
+                .divToInt(params.tokenRates.mainIco.total)
+                .add(OneEth);
 
             await increaseTimeTo(icoOpeningTime + tenSeconds);
-            await expectThrows(callCreate({value: OneWei}));
+            await callCreate({from: stranger, value: allTokensWeiAtMainIcoRate});
+            await checkPhase(params.icoPhases.afterIco);
+
+            await expectThrows(callCreate({from: stranger, value: OneWei}));
             await checkPhase(params.icoPhases.afterIco);
 
             await increaseTimeTo(icoClosingTime + tenSeconds);
-            await expectThrows(callCreate({value: OneWei}));
+            await expectThrows(callCreate({from: stranger, value: OneWei}));
             await checkPhase(params.icoPhases.afterIco);
             if (DUMP) await dump('*** =4.1');
         });
@@ -228,8 +231,12 @@ contract('UmuToken Phases', (accounts) => {
         it('should never end after "icoClosingTime"', async () =>  {
             await increaseTimeTo(icoClosingTime + tenSeconds);
             callCreate({value: OneEth});
-
             await checkPhase(params.icoPhases.afterIco);
+
+            await increaseTimeTo(icoClosingTime + tenSeconds*6);
+            await expectThrows(callCreate({value: OneWei}));
+            await checkPhase(params.icoPhases.afterIco);
+
             if (DUMP) await dump('*** =4.2');
         });
 

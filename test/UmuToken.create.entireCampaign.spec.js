@@ -33,6 +33,10 @@ contract('UmuToken ICO campaign', (accounts) => {
 
     const campaignProceeds = preIcoProceeds.add(mainIcoProceeds);
 
+    const icoQtyLimitAtRateAPlusOneEth = params.tokenQtyLimits.total
+        .divToInt(params.tokenRates.preIcoA.total)
+        .add(OneEth);
+
     const buyerPreIcoTokens = preIcoProceeds.mul(params.tokenRates.preIcoA.sender);
     const buyerMainIcoTokens = mainIcoProceeds.mul(params.tokenRates.mainIco.sender);
     const campaignBuyerTokens = buyerPreIcoTokens.add(buyerMainIcoTokens);
@@ -81,8 +85,12 @@ contract('UmuToken ICO campaign', (accounts) => {
 
     });
 
-    describe('create() during  Pre-ICO Phase A with ETH value worth all pre-ICO tokens', async () => {
+    describe('create() called on Phase A with value worth all ICO tokens at Phase A rate plus one ETH', async () => {
         let pre, post, tx;
+
+        const overpaidWeiPlusAward = icoQtyLimitAtRateAPlusOneEth
+            .sub(preIcoProceeds)
+            .add(params.awards.preOpening);
 
         beforeEach(async () => {
             tx = txs[0];
@@ -91,46 +99,55 @@ contract('UmuToken ICO campaign', (accounts) => {
         });
 
         it(`should set totalSupply to ${toUmuMio(params.tokenQtyLimits.preIco)}M tokens`, async () => {
-            let actual = post.totalSupply;
-            let expected = params.tokenQtyLimits.preIco;
+            const actual = post.totalSupply;
+            const expected = params.tokenQtyLimits.preIco;
             if (DUMP) dumpActVsExpect(actual, expected, '*f1');
             assert(actual.sub(expected).absoluteValue().toNumber() <= params.tokenRates.preIcoA.total);
         });
 
         it(`should set buyer balance to ${toUmuMio(buyerPreIcoTokens)}M tokens`, async () => {
-            let actual = post.tokenBalance.buyer;
-            let expected = buyerPreIcoTokens;
+            const actual = post.tokenBalance.buyer;
+            const expected = buyerPreIcoTokens;
             if (DUMP) dumpActVsExpect(actual, expected, '*f2');
             assert(actual.sub(expected).absoluteValue().toNumber() <= (params.tokenRates.preIcoA.sender));
         });
 
         it(`should set owner balance to ${toUmuMio(ownerPreIcoTokens)}M tokens`, async () => {
-            let actual = post.tokenBalance.owner;
-            let expected = ownerPreIcoTokens;
+            const actual = post.tokenBalance.owner;
+            const expected = ownerPreIcoTokens;
             if (DUMP) dumpActVsExpect(actual, expected, '*f3');
             assert(actual.sub(expected).absoluteValue().toNumber() <= (params.tokenRates.preIcoA.owner));
         });
 
         it(`should set bounty balance to ${toUmuMio(bountyPreIcoTokens)}M tokens`, async () => {
-            let actual = post.tokenBalance.bounty;
-            let expected = bountyPreIcoTokens;
+            const actual = post.tokenBalance.bounty;
+            const expected = bountyPreIcoTokens;
             if (DUMP) dumpActVsExpect(actual, expected, '*f4');
             assert(actual.sub(expected).absoluteValue().toNumber() <= (params.tokenRates.preIcoA.bounty));
         });
 
         it(`should add ${preIcoProceeds.div(1e+18)} ETH to the owner account`, async () => {
-            let actual = post.ethBalance.owner.sub(pre.ethBalance.owner);
-            let expected = preIcoProceeds;
+            const actual = post.ethBalance.owner.sub(pre.ethBalance.owner);
+            const expected = preIcoProceeds;
             if (DUMP) dumpActVsExpect(actual, expected, '*f5');
             assert(actual.sub(expected).absoluteValue().toNumber() <= 1);
         });
 
         it(`should set totalProceeds to ${preIcoProceeds.div(1e+18)} ETH`, async () => {
-            let actual = post.totalProceeds;
-            let expected = preIcoProceeds;
+            const actual = post.totalProceeds;
+            const expected = preIcoProceeds;
             if (DUMP) dumpActVsExpect(actual, expected, '*f6');
             assert(actual.sub(expected).absoluteValue().toNumber() <= 1);
         });
+
+        it(`should set withdrawals for the buyer to ${overpaidWeiPlusAward.div(1e+18)} ETH`,
+            async () => {
+                const actual = post.withdrawal.buyer;
+                const expected = overpaidWeiPlusAward;
+                if (DUMP) dumpActVsExpect(actual, expected, '*f7');
+                assert(actual.sub(expected).absoluteValue().toNumber() <= 1);
+            }
+        );
 
     });
 
@@ -146,8 +163,8 @@ contract('UmuToken ICO campaign', (accounts) => {
         });
 
         it(`should set totalSupply to ${toUmuMio(params.tokenQtyLimits.total.sub(quoterTokens))}M tokens`, async () => {
-            let actual = post.totalSupply;
-            let expected = params.tokenQtyLimits.total.sub(quoterTokens);
+            const actual = post.totalSupply;
+            const expected = params.tokenQtyLimits.total.sub(quoterTokens);
             let tolerance = params.tokenRates.preIcoA.total + params.tokenRates.mainIco.total;
 
             if (DUMP) dumpActVsExpect(actual, expected, '*e1');
@@ -155,8 +172,8 @@ contract('UmuToken ICO campaign', (accounts) => {
         });
 
         it(`should set totalProceeds to ${campaignProceeds.sub(QuoterEth).div(1e+18)} ETH`, async () => {
-            let actual = post.totalProceeds;
-            let expected = campaignProceeds.sub(QuoterEth);
+            const actual = post.totalProceeds;
+            const expected = campaignProceeds.sub(QuoterEth);
 
             if (DUMP) dumpActVsExpect(actual, expected, '*e2');
             assert(actual.sub(expected).absoluteValue().toNumber() <= 1);
@@ -174,51 +191,51 @@ contract('UmuToken ICO campaign', (accounts) => {
         });
 
         it(`should add ${params.tokenRates.mainIco.total/4} tokens to totalSupply`, async () => {
-            let actual = post.totalSupply.sub(pre.totalSupply);
-            let expected = (new BigNumber(params.tokenRates.mainIco.total)).mul(250e15);
+            const actual = post.totalSupply.sub(pre.totalSupply);
+            const expected = (new BigNumber(params.tokenRates.mainIco.total)).mul(250e15);
             if (DUMP) dumpActVsExpect(actual, expected, '*d1');
             assert(actual.sub(expected).absoluteValue().toNumber() <= params.tokenRates.mainIco.total);
         });
 
         it(`should add ${params.tokenRates.mainIco.sender/4} tokens to the buyer balance`, async () => {
-            let actual = post.tokenBalance.buyer.sub(pre.tokenBalance.buyer);
-            let expected = params.tokenRates.mainIco.sender*250e15;
+            const actual = post.tokenBalance.buyer.sub(pre.tokenBalance.buyer);
+            const expected = params.tokenRates.mainIco.sender*250e15;
             if (DUMP) dumpActVsExpect(actual, expected, '*d2');
             assert(actual.sub(expected).absoluteValue().toNumber() <= (params.tokenRates.mainIco.sender + 1));
         });
 
         it(`should add ${params.tokenRates.mainIco.owner/4} tokens to the owner balance`, async () => {
-            let actual = post.tokenBalance.owner.sub(pre.tokenBalance.owner);
-            let expected = params.tokenRates.mainIco.owner*250e15;
+            const actual = post.tokenBalance.owner.sub(pre.tokenBalance.owner);
+            const expected = params.tokenRates.mainIco.owner*250e15;
             if (DUMP) dumpActVsExpect(actual, expected, '*d3');
             assert(actual.sub(expected).absoluteValue().toNumber() <= (params.tokenRates.mainIco.owner + 1));
         });
 
         it(`should add ${params.tokenRates.mainIco.bounty/4} tokens to the bounty balance`, async () => {
-            let actual = post.tokenBalance.bounty.sub(pre.tokenBalance.bounty);
-            let expected = params.tokenRates.mainIco.bounty*250e15;
+            const actual = post.tokenBalance.bounty.sub(pre.tokenBalance.bounty);
+            const expected = params.tokenRates.mainIco.bounty*250e15;
             if (DUMP) dumpActVsExpect(actual, expected, '*d4');
             assert(actual.sub(expected).absoluteValue().toNumber() <= (params.tokenRates.mainIco.bounty + 1));
         });
 
         it('should add 0.25 Ether to the owner account', async () => {
-            let actual = post.ethBalance.owner.sub(pre.ethBalance.owner);
-            let expected = QuoterEth;
+            const actual = post.ethBalance.owner.sub(pre.ethBalance.owner);
+            const expected = QuoterEth;
             if (DUMP) dumpActVsExpect(actual, expected, '*d5');
             assert(actual.sub(expected).absoluteValue().toNumber() <= 1);
         });
 
         it('should add 0.25 Ether to the total proceeds', async () => {
-            let actual = post.totalProceeds.sub(pre.totalProceeds);
-            let expected = QuoterEth;
+            const actual = post.totalProceeds.sub(pre.totalProceeds);
+            const expected = QuoterEth;
             if (DUMP) dumpActVsExpect(actual, expected, '*d6');
             assert(actual.sub(expected).absoluteValue().toNumber() <= 1);
         });
 
         it(`should add 0.75 ETH and ${params.awards.closing.div(1e18)} ETH award to withdrawals for the buyer`,
             async () => {
-                let actual = post.withdrawal.buyer.sub(pre.withdrawal.buyer);
-                let expected = params.awards.closing.add(ThreeQuoterEth);
+                const actual = post.withdrawal.buyer.sub(pre.withdrawal.buyer);
+                const expected = params.awards.closing.add(ThreeQuoterEth);
                 if (DUMP) dumpActVsExpect(actual, expected, '*d7');
                 assert(actual.sub(expected).absoluteValue().toNumber() <= 1);
             }
@@ -226,8 +243,8 @@ contract('UmuToken ICO campaign', (accounts) => {
 
         it(`should emit Withdrawal event on overpaid 0.75 ETH`, async () => {
             let event = tx.logs[0];
-            let actual = event.args.weiAmount;
-            let expected = ThreeQuoterEth;
+            const actual = event.args.weiAmount;
+            const expected = ThreeQuoterEth;
 
             if (DUMP) dumpActVsExpect(actual, expected, '*8');
             assert.equal(event.event, 'Withdrawal');
@@ -237,8 +254,8 @@ contract('UmuToken ICO campaign', (accounts) => {
 
         it(`should emit NewTokens event on ${params.tokenRates.mainIco.total/4} tokens`, async () => {
             let event = tx.logs[1];
-            let actual = event.args.amount;
-            let expected = new BigNumber(params.tokenRates.mainIco.total).mul(QuoterEth);
+            const actual = event.args.amount;
+            const expected = new BigNumber(params.tokenRates.mainIco.total).mul(QuoterEth);
 
             if (DUMP) dumpActVsExpect(actual, expected, '*9');
             assert.equal(event.event, 'NewTokens');
@@ -247,8 +264,8 @@ contract('UmuToken ICO campaign', (accounts) => {
 
         it('should emit NewFunds event on 0.25 Ether', async () => {
             let event = tx.logs[2];
-            let actual = event.args.value;
-            let expected = QuoterEth;
+            const actual = event.args.value;
+            const expected = QuoterEth;
 
             if (DUMP) dumpActVsExpect(actual, expected, '*a');
             assert.equal(event.event, 'NewFunds');
@@ -258,8 +275,8 @@ contract('UmuToken ICO campaign', (accounts) => {
 
         it(`should emit Withdrawal event with ${params.awards.closing.div(1e18)} ETH award`, async () => {
             let event = tx.logs[3];
-            let actual = event.args.weiAmount;
-            let expected = params.awards.closing;
+            const actual = event.args.weiAmount;
+            const expected = params.awards.closing;
 
             if (DUMP) dumpActVsExpect(actual, expected, '*b');
             assert.equal(event.event, 'Withdrawal');
@@ -269,8 +286,8 @@ contract('UmuToken ICO campaign', (accounts) => {
 
         it(`should emit NewPhase event with Main ICO Phase`, async () => {
             let event = tx.logs[4];
-            let actual = event.args.phase.toNumber();
-            let expected = params.icoPhases.afterIco;
+            const actual = event.args.phase.toNumber();
+            const expected = params.icoPhases.afterIco;
 
             if (DUMP) dumpActVsExpect(actual, expected, '*c');
             assert.equal(event.event, 'NewPhase');
@@ -289,8 +306,8 @@ contract('UmuToken ICO campaign', (accounts) => {
         });
 
         it(`should set totalSupply to ${toUmuMio(params.tokenQtyLimits.total)}M tokens`, async () => {
-            let actual = post.totalSupply;
-            let expected = params.tokenQtyLimits.total;
+            const actual = post.totalSupply;
+            const expected = params.tokenQtyLimits.total;
             let tolerance = params.tokenRates.preIcoA.total + params.tokenRates.mainIco.total;
 
             if (DUMP) dumpActVsExpect(actual, expected, '*c1');
@@ -298,8 +315,8 @@ contract('UmuToken ICO campaign', (accounts) => {
         });
 
         it(`should set buyer balance to ${toUmuMio(campaignBuyerTokens)}M tokens`, async () => {
-            let actual = post.tokenBalance.buyer;
-            let expected = campaignBuyerTokens;
+            const actual = post.tokenBalance.buyer;
+            const expected = campaignBuyerTokens;
             let tolerance = params.tokenRates.preIcoA.sender + params.tokenRates.mainIco.sender;
 
             if (DUMP) dumpActVsExpect(actual, expected, '*c2');
@@ -307,8 +324,8 @@ contract('UmuToken ICO campaign', (accounts) => {
         });
 
         it(`should set owner balance to ${toUmuMio(campaignOwnerTokens)}M tokens`, async () => {
-            let actual = post.tokenBalance.owner;
-            let expected = campaignOwnerTokens;
+            const actual = post.tokenBalance.owner;
+            const expected = campaignOwnerTokens;
             let tolerance = params.tokenRates.preIcoA.owner + params.tokenRates.mainIco.owner;
 
             if (DUMP) dumpActVsExpect(actual, expected, '*c3');
@@ -316,8 +333,8 @@ contract('UmuToken ICO campaign', (accounts) => {
         });
 
         it(`should set bounty balance to ${toUmuMio(campaignBountyTokens)}M tokens`, async () => {
-            let actual = post.tokenBalance.bounty;
-            let expected = campaignBountyTokens;
+            const actual = post.tokenBalance.bounty;
+            const expected = campaignBountyTokens;
             let tolerance = params.tokenRates.preIcoA.bounty + params.tokenRates.mainIco.bounty;
 
             if (DUMP) dumpActVsExpect(actual, expected, '*c4');
@@ -325,24 +342,24 @@ contract('UmuToken ICO campaign', (accounts) => {
         });
 
         it(`should set totalSupply to the sum of customer', owner' and bounty' tokens`, async () => {
-            let actual = post.totalSupply;
-            let expected = post.tokenBalance.buyer.add(post.tokenBalance.owner).add(post.tokenBalance.bounty);
+            const actual = post.totalSupply;
+            const expected = post.tokenBalance.buyer.add(post.tokenBalance.owner).add(post.tokenBalance.bounty);
 
             if (DUMP) dumpActVsExpect(actual, expected, '*c5');
             assert.equal(actual.sub(expected).absoluteValue().toNumber(), 0);
         });
 
         it(`should add ${campaignProceeds.div(1e+18)} ETH to the owner account`, async () => {
-            let actual = post.ethBalance.owner.sub(pre.ethBalance.owner);
-            let expected = campaignProceeds;
+            const actual = post.ethBalance.owner.sub(pre.ethBalance.owner);
+            const expected = campaignProceeds;
 
             if (DUMP) dumpActVsExpect(actual, expected, '*c6');
             assert(actual.sub(expected).absoluteValue().toNumber() <= 1);
         });
 
         it(`should set totalProceeds to ${campaignProceeds.div(1e+18)} ETH`, async () => {
-            let actual = post.totalProceeds;
-            let expected = campaignProceeds;
+            const actual = post.totalProceeds;
+            const expected = campaignProceeds;
 
             if (DUMP) dumpActVsExpect(actual, expected, '*c7');
             assert(actual.sub(expected).absoluteValue().toNumber() <= 1);
@@ -360,7 +377,7 @@ contract('UmuToken ICO campaign', (accounts) => {
             .toString();
         if (DUMP) console.warn("preICO target Wei: " + targetPreIcotWei);
 
-        const tx = await token.create({from: fromAddr, value: targetPreIcotWei});
+        const tx = await token.create({from: fromAddr, value: icoQtyLimitAtRateAPlusOneEth});
         if (DUMP) logEvents(tx);
 
         await checkPhase(params.icoPhases.preIcoB);

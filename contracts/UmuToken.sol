@@ -36,6 +36,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
 
     uint64 constant internal PRE_ICO_DURATION = 30 days;
     uint64 constant internal ICO_DURATION = 82 days;
+    uint64 constant internal RETURN_WEI_PAUSE = 30 days;
 
     // Main ICO rate in UMU(s) per 1 ETH:
     uint256 constant internal TO_SENDER_RATE   = 1000;
@@ -76,6 +77,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     uint64 public preIcoOpeningTime;  // when Pre-ICO Phase A starts
     uint64 public icoOpeningTime;     // when Main ICO starts (if not sold out before)
     uint64 public closingTime;        // by when the ICO campaign finishes in any way
+    uint64 public returnAllowedTime;  // when owner may withdraw Eth from contract, if any
 
     uint256 public totalProceeds;
 
@@ -157,7 +159,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
         return true;
     }
 
-    function returnWei() onlyOwner whenClosed public {
+    function returnWei() onlyOwner whenClosed afterWithdrawPause public {
         owner.transfer(this.balance);
     }
 
@@ -239,6 +241,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
 
         } else {
             shiftAward = ICO_CLOSING_AWARD;
+            returnAllowedTime = uint64(now + RETURN_WEI_PAUSE);
         }
 
         withdrawal(msg.sender, shiftAward);
@@ -291,6 +294,11 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
 
     modifier limitForOwner() {
         require((msg.sender != owner) || (phase == Phases.AfterIco));
+        _;
+    }
+
+    modifier afterWithdrawPause() {
+        require(now > returnAllowedTime);
         _;
     }
 

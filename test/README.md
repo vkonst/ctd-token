@@ -14,7 +14,7 @@ $ `truffle test`
 
 or
 
-$ `export DUMP=1; ./scripts/js-test "Ownable Once Withdrawable StandardToken ChangeLogic preStart preIcoLimit preIcoA preIcoB mainIco afterIco Campaign" | tee test/log/all.YYYYMMDD-hhmm.log`
+$ `export DUMP=1; ./scripts/js-test "Ownable Once Withdrawable StandardToken Wei ChangeLogic preStart preIcoLimit preIcoA preIcoB mainIco afterIco Campaign" | tee test/log/all.YYYYMMDD-hhmm.log`
 
 <pre>
 test/log/afterIco.log:  18 passing (44s)`
@@ -28,5 +28,6 @@ test/log/preIcoB.log:  22 passing (38s)
 test/log/preIcoLimit.log:  12 passing (3s)
 test/log/preStart.log:  3 passing (3s)
 test/log/StandardToken.log:  29 passing (28s)
+test/log/Wei.log:  4 passing (3s)
 test/log/Withdrawable.log:  14 passing (12s)
 </pre>

@@ -1,15 +1,15 @@
 import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
-import params from './helpers/UmuToken.params';
-import {DUMP, dumper, dumpActVsExpect, logEvents} from "./helpers/UmuToken.utils";
+import params from './helpers/CtdToken.params';
+import {DUMP, dumper, dumpActVsExpect, logEvents} from "./helpers/CtdToken.utils";
 
 /*global artifacts, assert, before, beforeEach, afterEach, web3*/
 
-const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+const CtdTokenMock = artifacts.require('./helpers/CtdTokenMock.sol');
 
 const BigNumber = web3.BigNumber;
 
-contract('UmuToken.create() on Pre-ICO Phase', (accounts) => {
+contract('CtdToken.create() on Pre-ICO Phase', (accounts) => {
     let token, preIcoOpeningTime;
 
     let owner = accounts[0];
@@ -31,7 +31,7 @@ contract('UmuToken.create() on Pre-ICO Phase', (accounts) => {
             const timeNow = await latestTime();
             preIcoOpeningTime = timeNow + 6*tenSeconds;
 
-            token = await UmuTokenMock.new(preIcoOpeningTime);
+            token = await CtdTokenMock.new(preIcoOpeningTime);
             await token.setBounty(bounty);
 
             if (DUMP) {

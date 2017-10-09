@@ -1,14 +1,14 @@
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
-import params from './helpers/UmuToken.params';
-import {DUMP, dumper, toUmuMio} from "./helpers/UmuToken.utils";
+import params from './helpers/CtdToken.params';
+import {DUMP, dumper, toCtdMio} from "./helpers/CtdToken.utils";
 
 /*global artifacts, assert, beforeEach, afterEach*/
 
-const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+const CtdTokenMock = artifacts.require('./helpers/CtdTokenMock.sol');
 
-contract('UmuToken Phases', (accounts) => {
+contract('CtdToken Phases', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime, icoClosingTime;
 
     let owner = accounts[0];
@@ -19,8 +19,8 @@ contract('UmuToken Phases', (accounts) => {
     const OneEth = 1e18;
     const tenSeconds = 10;
 
-    const preIcoLimitMio = toUmuMio(params.tokenQtyLimits.preIco);
-    const allIcoLimitMio = toUmuMio(params.tokenQtyLimits.total);
+    const preIcoLimitMio = toCtdMio(params.tokenQtyLimits.preIco);
+    const allIcoLimitMio = toCtdMio(params.tokenQtyLimits.total);
 
     let dump;
 
@@ -29,7 +29,7 @@ contract('UmuToken Phases', (accounts) => {
         preIcoOpeningTime = timeNow + 6*tenSeconds;
         icoOpeningTime = preIcoOpeningTime + params.durationLimits.preIco;
         icoClosingTime = icoOpeningTime + params.durationLimits.mainIco;
-        token = await UmuTokenMock.new(preIcoOpeningTime);
+        token = await CtdTokenMock.new(preIcoOpeningTime);
 
         if (DUMP) {
             dump = await dumper(token, {owner, buyer});

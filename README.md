@@ -1,4 +1,4 @@
-# UmU tokens
+# CTD tokens
 
 **ERC20** tokens **extended** with the following features:<br/>
 - Number of tokens to issue(sell) is limited (hard-coded) but not pre-fixed<br/>

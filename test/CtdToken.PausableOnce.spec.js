@@ -1,15 +1,15 @@
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import increaseTime, {increaseTimeTo, duration} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
-import params from './helpers/UmuToken.params';
+import params from './helpers/CtdToken.params';
 
 /*global artifacts, assert, beforeEach, afterEach*/
 
-const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+const CtdTokenMock = artifacts.require('./helpers/CtdTokenMock.sol');
 
 const PAUSE_DURATION = duration.days(14);
 
-contract('UmuToken is PausableOnce', (accounts) => {
+contract('CtdToken is PausableOnce', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime, icoClosingTime;
 
     let owner = accounts[0];
@@ -27,7 +27,7 @@ contract('UmuToken is PausableOnce', (accounts) => {
         icoOpeningTime = preIcoOpeningTime + params.durationLimits.preIco;
         icoClosingTime = icoOpeningTime + params.durationLimits.mainIco;
 
-        token = await UmuTokenMock.new(preIcoOpeningTime, {value: OneEth});
+        token = await CtdTokenMock.new(preIcoOpeningTime, {value: OneEth});
         await token.setBounty(bounty);
     });
 

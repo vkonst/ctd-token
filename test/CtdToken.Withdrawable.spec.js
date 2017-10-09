@@ -3,9 +3,9 @@ import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 
 /*global artifacts, assert, beforeEach, afterEach*/
 
-const WithdrawableMock = artifacts.require('./helpers/UmuTokenMock.sol');
+const WithdrawableMock = artifacts.require('./helpers/CtdTokenMock.sol');
 
-contract('UmuToken is Withdrawable', (accounts) => {
+contract('CtdToken is Withdrawable', (accounts) => {
     let withdrawable;
 
     let owner = accounts[0];

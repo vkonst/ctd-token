@@ -6,13 +6,13 @@ import './UpgradableToken.sol';
 import './Withdrawable.sol';
 
 
-contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
+contract CtdToken is UpgradableToken, PausableOnce, Withdrawable {
 
     using SafeMath for uint256;
 
-    string public constant name = "UMU Token";
-    string public constant symbol = "UMU";
-    /** Number of "Atom" in 1 UMU (1 UMU = 1x10^decimals Atom) */
+    string public constant name = "Cointed Token";
+    string public constant symbol = "CTD";
+    /** Number of "Atom" in 1 CTD (1 CTD = 1x10^decimals Atom) */
     uint8  public constant decimals = 18;
 
     /** Holder of bounty tokens */
@@ -38,7 +38,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     uint64 constant internal ICO_DURATION = 82 days;
     uint64 constant internal RETURN_WEI_PAUSE = 30 days;
 
-    // Main ICO rate in UMU(s) per 1 ETH:
+    // Main ICO rate in CTD(s) per 1 ETH:
     uint256 constant internal TO_SENDER_RATE   = 1000;
     uint256 constant internal TO_OWNER_RATE    =  263;
     uint256 constant internal TO_BOUNTY_RATE   =   52;
@@ -85,7 +85,7 @@ contract UmuToken is UpgradableToken, PausableOnce, Withdrawable {
     * @param _preIcoOpeningTime Timestamp when the Pre-ICO (Phase A) shall start
     * msg.value MUST be at least the sum of awards
     */
-    function UmuToken(uint64 _preIcoOpeningTime) payable {
+    function CtdToken(uint64 _preIcoOpeningTime) payable {
         require(_preIcoOpeningTime > now);
 
         owner = msg.sender;

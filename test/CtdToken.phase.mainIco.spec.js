@@ -1,14 +1,14 @@
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
-import params from './helpers/UmuToken.params';
-import {DUMP, dumper, toUmu} from "./helpers/UmuToken.utils";
+import params from './helpers/CtdToken.params';
+import {DUMP, dumper, toCtd} from "./helpers/CtdToken.utils";
 
 /*global artifacts, assert, beforeEach, afterEach*/
 
-const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+const CtdTokenMock = artifacts.require('./helpers/CtdTokenMock.sol');
 
-contract('UmuToken Main ICO Phase', (accounts) => {
+contract('CtdToken Main ICO Phase', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime, icoClosingTime;
     let beforeOwnerEthBalance, beforeTotalSupply, beforeTokenBalanceOfOwner, beforeTokenBalanceOfBounty;
 
@@ -29,7 +29,7 @@ contract('UmuToken Main ICO Phase', (accounts) => {
         icoOpeningTime = preIcoOpeningTime + params.durationLimits.preIco;
         icoClosingTime = icoOpeningTime + params.durationLimits.mainIco;
 
-        token = await UmuTokenMock.new(preIcoOpeningTime);
+        token = await CtdTokenMock.new(preIcoOpeningTime);
         await token.setBounty(bounty);
 
         if (DUMP) {
@@ -55,21 +55,21 @@ contract('UmuToken Main ICO Phase', (accounts) => {
 
         it(`should add ${params.tokenRates.mainIco.total} tokens to totalSupply`, async () => {
             let addedTokens = (await token.totalSupply.call()).sub(beforeTotalSupply);
-            assert.equal(toUmu(addedTokens), params.tokenRates.mainIco.total);
+            assert.equal(toCtd(addedTokens), params.tokenRates.mainIco.total);
         });
 
         it(`should add ${params.tokenRates.mainIco.sender} tokens to the buyer balance`, async () => {
-            assert.equal(toUmu(await token.getTokenBalanceOf.call(buyer)), params.tokenRates.mainIco.sender);
+            assert.equal(toCtd(await token.getTokenBalanceOf.call(buyer)), params.tokenRates.mainIco.sender);
         });
 
         it(`should add ${params.tokenRates.mainIco.owner} tokens to the owner balance`, async () => {
             let addedTokens = (await token.getTokenBalanceOf.call(owner)).sub(beforeTokenBalanceOfOwner);
-            assert.equal(toUmu(addedTokens), params.tokenRates.mainIco.owner);
+            assert.equal(toCtd(addedTokens), params.tokenRates.mainIco.owner);
         });
 
         it(`should add ${params.tokenRates.mainIco.bounty} tokens to the bounty balance`, async () => {
             let addedTokens = (await token.getTokenBalanceOf.call(bounty)).sub(beforeTokenBalanceOfBounty);
-            assert.equal(toUmu(addedTokens), params.tokenRates.mainIco.bounty);
+            assert.equal(toCtd(addedTokens), params.tokenRates.mainIco.bounty);
         });
 
         it('should add 1 Ether to the owner account', async () => {

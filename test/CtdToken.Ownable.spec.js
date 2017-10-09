@@ -3,10 +3,10 @@ import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 
 /*global artifacts, assert, beforeEach, afterEach*/
 
-const OwnableMock = artifacts.require('./helpers/UmuTokenMock.sol');
+const OwnableMock = artifacts.require('./helpers/CtdTokenMock.sol');
 
 
-contract('UmuToken is Ownable', (accounts) => {
+contract('CtdToken is Ownable', (accounts) => {
     let ownable;
 
     let owner = accounts[0];

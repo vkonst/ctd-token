@@ -3,9 +3,9 @@ import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
 
 /*global artifacts, assert, beforeEach, afterEach*/
 
-const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+const CtdTokenMock = artifacts.require('./helpers/CtdTokenMock.sol');
 
-contract('UmuToken is StandardToken', (accounts) => {
+contract('CtdToken is StandardToken', (accounts) => {
     let token;
 
     let owner = accounts[0];
@@ -18,7 +18,7 @@ contract('UmuToken is StandardToken', (accounts) => {
         const tenSeconds = 10;
         const timeNow = await latestTime();
         const preIcoOpeningTime = timeNow + tenSeconds;
-        token = await UmuTokenMock.new(preIcoOpeningTime);
+        token = await CtdTokenMock.new(preIcoOpeningTime);
         await token.simulateNewTokens(transferor, tokensOnSale);
 
         assert.equal((await token.getTokenBalanceOf(transferor)).toNumber(), tokensOnSale);

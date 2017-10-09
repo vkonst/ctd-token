@@ -2,7 +2,7 @@
   "private": true,
   "name": "umu-ico",
   "version": "0.0.2",
-  "description": "Smart contracts for Umum ICO",
+  "description": "Smart contracts for Cointed ICO",
   "main": "bin/app.js",
   "scripts": {
     "compile": "truffle compile",

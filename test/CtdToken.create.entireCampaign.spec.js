@@ -1,15 +1,15 @@
 import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
-import params from './helpers/UmuToken.params';
-import {DUMP, dumper, dumpActVsExpect, logEvents, toUmuMio} from "./helpers/UmuToken.utils";
+import params from './helpers/CtdToken.params';
+import {DUMP, dumper, dumpActVsExpect, logEvents, toCtdMio} from "./helpers/CtdToken.utils";
 
 /*global artifacts, assert, before, beforeEach, afterEach, web3*/
 
-const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+const CtdTokenMock = artifacts.require('./helpers/CtdTokenMock.sol');
 
 const BigNumber = web3.BigNumber;
 
-contract('UmuToken ICO campaign', (accounts) => {
+contract('CtdToken ICO campaign', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime;
     let txs = [], states = {pre: [], post: []};
     let dump;
@@ -54,7 +54,7 @@ contract('UmuToken ICO campaign', (accounts) => {
         preIcoOpeningTime = timeNow + 6*tenSeconds;
         icoOpeningTime = preIcoOpeningTime + params.durationLimits.preIco;
 
-        token = await UmuTokenMock.new(preIcoOpeningTime);
+        token = await CtdTokenMock.new(preIcoOpeningTime);
         await token.setBounty(bounty);
 
         if (DUMP) {
@@ -98,28 +98,28 @@ contract('UmuToken ICO campaign', (accounts) => {
             post = states.post[0];
         });
 
-        it(`should set totalSupply to ${toUmuMio(params.tokenQtyLimits.preIco)}M tokens`, async () => {
+        it(`should set totalSupply to ${toCtdMio(params.tokenQtyLimits.preIco)}M tokens`, async () => {
             const actual = post.totalSupply;
             const expected = params.tokenQtyLimits.preIco;
             if (DUMP) dumpActVsExpect(actual, expected, '*f1');
             assert(actual.sub(expected).absoluteValue().toNumber() <= params.tokenRates.preIcoA.total);
         });
 
-        it(`should set buyer balance to ${toUmuMio(buyerPreIcoTokens)}M tokens`, async () => {
+        it(`should set buyer balance to ${toCtdMio(buyerPreIcoTokens)}M tokens`, async () => {
             const actual = post.tokenBalance.buyer;
             const expected = buyerPreIcoTokens;
             if (DUMP) dumpActVsExpect(actual, expected, '*f2');
             assert(actual.sub(expected).absoluteValue().toNumber() <= (params.tokenRates.preIcoA.sender));
         });
 
-        it(`should set owner balance to ${toUmuMio(ownerPreIcoTokens)}M tokens`, async () => {
+        it(`should set owner balance to ${toCtdMio(ownerPreIcoTokens)}M tokens`, async () => {
             const actual = post.tokenBalance.owner;
             const expected = ownerPreIcoTokens;
             if (DUMP) dumpActVsExpect(actual, expected, '*f3');
             assert(actual.sub(expected).absoluteValue().toNumber() <= (params.tokenRates.preIcoA.owner));
         });
 
-        it(`should set bounty balance to ${toUmuMio(bountyPreIcoTokens)}M tokens`, async () => {
+        it(`should set bounty balance to ${toCtdMio(bountyPreIcoTokens)}M tokens`, async () => {
             const actual = post.tokenBalance.bounty;
             const expected = bountyPreIcoTokens;
             if (DUMP) dumpActVsExpect(actual, expected, '*f4');
@@ -162,7 +162,7 @@ contract('UmuToken ICO campaign', (accounts) => {
             post = states.post[1];
         });
 
-        it(`should set totalSupply to ${toUmuMio(params.tokenQtyLimits.total.sub(quoterTokens))}M tokens`, async () => {
+        it(`should set totalSupply to ${toCtdMio(params.tokenQtyLimits.total.sub(quoterTokens))}M tokens`, async () => {
             const actual = post.totalSupply;
             const expected = params.tokenQtyLimits.total.sub(quoterTokens);
             let tolerance = params.tokenRates.preIcoA.total + params.tokenRates.mainIco.total;
@@ -305,7 +305,7 @@ contract('UmuToken ICO campaign', (accounts) => {
             post = states.post[2];
         });
 
-        it(`should set totalSupply to ${toUmuMio(params.tokenQtyLimits.total)}M tokens`, async () => {
+        it(`should set totalSupply to ${toCtdMio(params.tokenQtyLimits.total)}M tokens`, async () => {
             const actual = post.totalSupply;
             const expected = params.tokenQtyLimits.total;
             let tolerance = params.tokenRates.preIcoA.total + params.tokenRates.mainIco.total;
@@ -314,7 +314,7 @@ contract('UmuToken ICO campaign', (accounts) => {
             assert(actual.sub(expected).absoluteValue().toNumber() <= tolerance);
         });
 
-        it(`should set buyer balance to ${toUmuMio(campaignBuyerTokens)}M tokens`, async () => {
+        it(`should set buyer balance to ${toCtdMio(campaignBuyerTokens)}M tokens`, async () => {
             const actual = post.tokenBalance.buyer;
             const expected = campaignBuyerTokens;
             let tolerance = params.tokenRates.preIcoA.sender + params.tokenRates.mainIco.sender;
@@ -323,7 +323,7 @@ contract('UmuToken ICO campaign', (accounts) => {
             assert(actual.sub(expected).absoluteValue().toNumber() <= tolerance);
         });
 
-        it(`should set owner balance to ${toUmuMio(campaignOwnerTokens)}M tokens`, async () => {
+        it(`should set owner balance to ${toCtdMio(campaignOwnerTokens)}M tokens`, async () => {
             const actual = post.tokenBalance.owner;
             const expected = campaignOwnerTokens;
             let tolerance = params.tokenRates.preIcoA.owner + params.tokenRates.mainIco.owner;
@@ -332,7 +332,7 @@ contract('UmuToken ICO campaign', (accounts) => {
             assert(actual.sub(expected).absoluteValue().toNumber() <= tolerance);
         });
 
-        it(`should set bounty balance to ${toUmuMio(campaignBountyTokens)}M tokens`, async () => {
+        it(`should set bounty balance to ${toCtdMio(campaignBountyTokens)}M tokens`, async () => {
             const actual = post.tokenBalance.bounty;
             const expected = campaignBountyTokens;
             let tolerance = params.tokenRates.preIcoA.bounty + params.tokenRates.mainIco.bounty;

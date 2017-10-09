@@ -1,19 +1,20 @@
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
-import params from './helpers/UmuToken.params';
+import params from './helpers/CtdToken.params';
 
-/*global artifacts, assert, beforeEach, afterEach, web3*/
+/*global artifacts, assert, beforeEach, afterEach, web3 */
 
-const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+const CtdTokenMock = artifacts.require('./helpers/CtdTokenMock.sol');
 const BigNumber = web3.BigNumber;
 
-contract('UmuToken Pre-ICO Phase A', (accounts) => {
+contract('CtdToken Pre-ICO Phase B', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime, icoClosingTime;
-    let beforeOwnerEthBalance;
+    let beforeOwnerEthBalance, beforeTotalSupply, beforeTokenBalanceOfOwner, beforeTokenBalanceOfBounty;
 
     let owner = accounts[0];
     let buyer = accounts[1];
+    let stranger = accounts[3];
     let bounty = accounts[4];
 
     const OneWei = 1;
@@ -26,36 +27,43 @@ contract('UmuToken Pre-ICO Phase A', (accounts) => {
         icoOpeningTime = preIcoOpeningTime + params.durationLimits.preIco;
         icoClosingTime = icoOpeningTime + params.durationLimits.mainIco;
 
-        token = await UmuTokenMock.new(preIcoOpeningTime);
+        token = await CtdTokenMock.new(preIcoOpeningTime);
         await token.setBounty(bounty);
+    });
+
+    beforeEach(async () => {
+        await setPhase();
     });
 
     describe('a call from buyer of "create()" with value of 1 ETH', async () => {
 
         beforeEach(async () => {
-            assert.equal(await token.totalSupply.call(), 0);
-            assert.equal(await token.getTokenBalanceOf.call(buyer), 0);
-            assert.equal(await token.getTokenBalanceOf.call(owner), 0);
-            assert.equal(await token.getTokenBalanceOf.call(bounty), 0);
+            beforeTotalSupply = await token.totalSupply.call();
+            beforeTokenBalanceOfOwner = await token.getTokenBalanceOf.call(owner);
+            beforeTokenBalanceOfBounty = await token.getTokenBalanceOf.call(bounty);
             beforeOwnerEthBalance = await token.getBalanceAt(owner);
+            assert.equal(await token.getTokenBalanceOf.call(buyer), 0);
 
-            await setPhaseAndCallCreateWithOneEthFrom(buyer);
+            await callCreateWithOneEthFrom(buyer);
         });
 
-        it(`should add ${params.tokenRates.preIcoA.total} tokens to totalSupply`, async () => {
-            assert.equal(toUmu(await token.totalSupply.call()), params.tokenRates.preIcoA.total);
+        it(`should add ${params.tokenRates.preIcoB.total} tokens to totalSupply`, async () => {
+            let addedTokens = (await token.totalSupply.call()).sub(beforeTotalSupply);
+            assert.equal(toCtd(addedTokens), params.tokenRates.preIcoB.total);
         });
 
-        it(`should add ${params.tokenRates.preIcoA.sender} tokens to the buyer balance`, async () => {
-            assert.equal(toUmu(await token.getTokenBalanceOf.call(buyer)), params.tokenRates.preIcoA.sender);
+        it(`should add ${params.tokenRates.preIcoB.sender} tokens to the buyer balance`, async () => {
+            assert.equal(toCtd(await token.getTokenBalanceOf.call(buyer)), params.tokenRates.preIcoB.sender);
         });
 
-        it(`should add ${params.tokenRates.preIcoA.owner} tokens to the owner balance`, async () => {
-            assert.equal(toUmu(await token.getTokenBalanceOf.call(owner)), params.tokenRates.preIcoA.owner);
+        it(`should add ${params.tokenRates.preIcoB.owner} tokens to the owner balance`, async () => {
+            let addedTokens = (await token.getTokenBalanceOf.call(owner)).sub(beforeTokenBalanceOfOwner);
+            assert.equal(toCtd(addedTokens), params.tokenRates.preIcoB.owner);
         });
 
-        it(`should add ${params.tokenRates.preIcoA.bounty} tokens to the bounty balance`, async () => {
-            assert.equal(toUmu(await token.getTokenBalanceOf.call(bounty)), params.tokenRates.preIcoA.bounty);
+        it(`should add ${params.tokenRates.preIcoB.bounty} tokens to the bounty balance`, async () => {
+            let addedTokens = (await token.getTokenBalanceOf.call(bounty)).sub(beforeTokenBalanceOfBounty);
+            assert.equal(toCtd(addedTokens), params.tokenRates.preIcoB.bounty);
         });
 
         it('should add 1 Ether to the owner account', async () => {
@@ -70,7 +78,7 @@ contract('UmuToken Pre-ICO Phase A', (accounts) => {
         let tx;
 
         beforeEach(async () => {
-            tx = await setPhaseAndCallCreateWithOneEthFrom(owner);
+            tx = await callCreateWithOneEthFrom(owner);
         });
 
         it('should NOT throw error if create() called', async () => {
@@ -106,7 +114,7 @@ contract('UmuToken Pre-ICO Phase A', (accounts) => {
     describe('a call by the buyer', async () => {
 
         beforeEach(async () => {
-            await setPhaseAndCallCreateWithOneEthFrom();
+            await callCreateWithOneEthFrom();
         });
 
         it('should NOT throw error if transfer() called and balance available', async () => {
@@ -141,7 +149,7 @@ contract('UmuToken Pre-ICO Phase A', (accounts) => {
         let tx;
 
         beforeEach(async () => {
-            tx = await setPhaseAndCallCreateWithOneEthFrom(bounty);
+            tx = await callCreateWithOneEthFrom(bounty);
         });
 
         it('should NOT throw error if create() called', async () => {
@@ -179,12 +187,15 @@ contract('UmuToken Pre-ICO Phase A', (accounts) => {
 
     });
 
-    async function setPhaseAndCallCreateWithOneEthFrom(fromAddr = buyer) {
-        let tx;
+    async function setPhase(fromAddr = stranger) {
+        // switch to Pre-ICO Phase B
         await increaseTimeTo(preIcoOpeningTime + tenSeconds);
-        tx = await token.create({from: fromAddr, value: OneEth});
-        await checkPhase(params.icoPhases.preIcoA);
-        return tx;
+        await token.create({from: fromAddr, value: params.maxPreIcoAPhaseWei + OneEth});
+        await checkPhase(params.icoPhases.preIcoB);
+    }
+
+    async function callCreateWithOneEthFrom(fromAddr = buyer) {
+        return await token.create({from: fromAddr, value: OneEth});
     }
 
     async function checkPhase(expectedPhase) {
@@ -193,7 +204,7 @@ contract('UmuToken Pre-ICO Phase A', (accounts) => {
         assert.equal(actualPhase, expectedPhase);
     }
 
-    function toUmu(atoms) {
+    function toCtd(atoms) {
         let bigAtoms = (typeof atoms === 'number') ? (new BigNumber(atoms)) : atoms;
         return bigAtoms.div(1e18).toNumber();
     }

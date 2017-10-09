@@ -3,13 +3,13 @@ const BigNumber = web3.BigNumber;
 
 export const gasPrice = 100e9;
 
-export function toUmu(atoms) {
+export function toCtd(atoms) {
     let bigAtoms = (typeof atoms === 'number') ? (new BigNumber(atoms)) : atoms;
     return bigAtoms.div(1e18).toNumber();
 }
 
-export function toUmuMio(atoms) {
-    return toUmu(atoms)/1000000;
+export function toCtdMio(atoms) {
+    return toCtd(atoms)/1000000;
 }
 
 export const DUMP = !!process.env.DUMP;

@@ -1,11 +1,11 @@
 pragma solidity 0.4.15;
 
-import '../../contracts/UmuToken.sol';
+import '../../contracts/CtdToken.sol';
 
 
-contract UmuTokenMock is UmuToken {
+contract CtdTokenMock is CtdToken {
 
-    function UmuTokenMock(uint64 _preIcoOpeningTime) payable UmuToken (_preIcoOpeningTime) { }
+    function CtdTokenMock(uint64 _preIcoOpeningTime) payable CtdToken(_preIcoOpeningTime) { }
 
     function getBalance() public constant returns (uint256 weiAmount) {
         return this.balance;

@@ -1,13 +1,13 @@
 import expectThrows from './lib/zeppelin-solidity/test/helpers/expectThrows';
 import {increaseTimeTo} from './lib/zeppelin-solidity/test/helpers/increaseTime';
 import latestTime from './lib/zeppelin-solidity/test/helpers/latestTime';
-import params from './helpers/UmuToken.params';
+import params from './helpers/CtdToken.params';
 
 /*global artifacts, assert, beforeEach, afterEach*/
 
-const UmuTokenMock = artifacts.require('./helpers/UmuTokenMock.sol');
+const CtdTokenMock = artifacts.require('./helpers/CtdTokenMock.sol');
 
-contract('UmuToken After ICO Phase', (accounts) => {
+contract('CtdToken After ICO Phase', (accounts) => {
     let token, preIcoOpeningTime, icoOpeningTime, icoClosingTime;
 
     let owner = accounts[0];
@@ -25,7 +25,7 @@ contract('UmuToken After ICO Phase', (accounts) => {
         icoOpeningTime = preIcoOpeningTime + params.durationLimits.preIco;
         icoClosingTime = icoOpeningTime + params.durationLimits.mainIco;
 
-        token = await UmuTokenMock.new(preIcoOpeningTime);
+        token = await CtdTokenMock.new(preIcoOpeningTime);
         await token.setBounty(bounty);
     });
 

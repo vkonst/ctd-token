@@ -8,11 +8,11 @@ module.exports = function(deployer) {
     // const threeMinutes = 180;
     // const preIcoOpeningTime = timeNow + threeMinutes;
 
-    // const UmuToken = artifacts.require('./UmuToken.sol');
-    // console.warn("*** UmuToken    .binary.length :" + UmuToken.binary.length);
-    // deployer.deploy(UmuToken, preIcoOpeningTime);
+    // const CtdToken = artifacts.require('./CtdToken.sol');
+    // console.warn("*** CtdToken    .binary.length :" + CtdToken.binary.length);
+    // deployer.deploy(CtdToken, preIcoOpeningTime);
 
-    // const UmuTokenMock = artifacts.require('../test/helpers/UmuTokenMock.sol');
-    // console.warn("*** UmuTokenMock.binary.length :" + UmuTokenMock.binary.length);
-    // deployer.deploy(UmuTokenMock, preIcoOpeningTime);
+    // const CtdTokenMock = artifacts.require('../test/helpers/CtdTokenMock.sol');
+    // console.warn("*** CtdTokenMock.binary.length :" + CtdTokenMock.binary.length);
+    // deployer.deploy(CtdTokenMock, preIcoOpeningTime);
 };

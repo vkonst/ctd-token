@@ -14,11 +14,11 @@ module.exports = {
         useColors: false,
         slow: 30000,
         // bail: true,
-        grep: "UmuTokenMock",
+        grep: "CtdTokenMock",
         invert: true
     },
     version: "0.0.2",
     package_name: "ctd-ico",
-    description: "Smart-contracts for Umum ICO",
+    description: "Smart-contracts for Cointed Token and Token Sale",
     license: "MIT"
 };

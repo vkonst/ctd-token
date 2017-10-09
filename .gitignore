@@ -3,7 +3,7 @@ build
 node_modules
 npm-debug.log
 package-lock.json
-doc/examples/other
+doc/examples
 **/del.me
 **/*.log
 tools

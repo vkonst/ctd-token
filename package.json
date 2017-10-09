@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "umu-ico",
+  "name": "ctd-ico",
   "version": "0.0.2",
-  "description": "Smart contracts for Cointed ICO",
+  "description": "Smart contracts for Cointed Token and Token Sale",
   "main": "bin/app.js",
   "scripts": {
     "compile": "truffle compile",
@@ -11,17 +11,19 @@
   },
   "repository": {
     "type": "git",
-    "url": " https://konstantinovv@bitbucket.org/konstantinovv/umu-ico.git"
+    "url": " https://github.com/vkonst/ctd-token.git"
   },
   "keywords": [
+    "Cointed",
     "ICO",
+    "token",
     "smartcontract",
     "ethereum",
     "ERC20"
   ],
   "author": "{name: Vadim Konstantinov, email:vadim.konstantinov@gmail.com}",
   "license": "MIT",
-  "homepage": "https://bitbucket.org/konstantinovv/umu-ico",
+  "homepage": "https://github.com/vkonst/ctd-token.git",
   "devDependencies": {
     "babel-polyfill": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",

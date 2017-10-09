@@ -26,8 +26,38 @@ shift
 echo "[*] command: ${cmd}"
 echo "[*] nodes:   ${nodes}"
 
-tmpfile="/tmp/geth.static-nodes.tmp"
-rm -f ${tmpfile}
+# Update with your destination folders
+VOLUMES='/var/docker-volumes/vol1';
+TMPFILE="/tmp/geth.static-nodes.tmp"
+
+function create_genesis {
+  cat > $1 << EOBlock
+{
+  "config": {
+        "chainId": 0,
+        "homesteadBlock": 0,
+        "eip155Block": 0,
+        "eip158Block": 0
+    },
+  "alloc"      : {
+    "0xbf3bedb9ab1ec515c5677498db9b91f6c2bda9a3": {"balance": "10000000000000000000000000"},
+    "0xc9e262a39562cbee76fab4407fd81fa9a7111e9e": {"balance": "10000000000000000000000000"},
+    "0xa391fea4cd77de8c62661a80e472339c61f5e8ae": {"balance": "10000000000000000000000000"},
+    "0xdde2d3ec82314b81159504ec9011284da0ad4873": {"balance": "10000000000000000000000000"}
+   },
+  "coinbase"   : "0xbf3bedb9ab1ec515c5677498db9b91f6c2bda9a3",
+  "difficulty" : "0x20000",
+  "extraData"  : "",
+  "gasLimit"   : "0x3d0900",
+  "nonce"      : "0xdddbe45602e88ee7",
+  "mixhash"    : "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "parentHash" : "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "timestamp"  : "0x00"
+}
+EOBlock
+}
+
+rm -f ${TMPFILE}
 
 for i in ${nodes}; do
 
@@ -35,7 +65,7 @@ for i in ${nodes}; do
     echo "[*] node ${i}: stoping and cleaning pipe ..."
 
     set +e; docker stop e${i} > /dev/null 2>&1; set -e;
-    rm -f /var/docker-volumes/vol1/host${i}/root/.ethereum/geth.ipc
+    rm -f ${VOLUMES}/host${i}/root/.ethereum/geth.ipc
   fi;
 
   if [[ "${cmd}" =~ ^(restart|init|clean)$ ]]; then
@@ -48,14 +78,16 @@ for i in ${nodes}; do
   if [[ "${cmd}" =~ ^(init|purge)$ ]]; then
     echo "[*] node ${i}: deleting DBase and cache ..."
 
-    rm --force --recursive /var/docker-volumes/vol1/host${i}/root/.ethereum/geth
-    rm --force --recursive /var/docker-volumes/vol1/host${i}/root/.ethash
+    rm --force --recursive ${VOLUMES}/host${i}/root/.ethereum/geth
+    rm --force --recursive ${VOLUMES}/host${i}/root/.ethash
   fi;
 
-  if [[ "${cmd}" =~ ^(init)$ ]]; then 
+  if [[ "${cmd}" =~ ^(init)$ ]]; then
     echo "[*] node ${i}: DBase re-initialization ..."
 
-    docker run --name e${i} -v /var/docker-volumes/vol1/host${i}/root/:/root/ \
+    create_genesis ${VOLUMES}/host${i}/root/.ethereum/genesis.json
+
+    docker run --name e${i} -v ${VOLUMES}/host${i}/root/:/root/ \
       ethereum/client-go init /root/.ethereum/genesis.json
     cnt=$(docker ps -aq --filter name=e${i});
     [ ! -z ${cnt} ] && docker rm ${cnt};
@@ -67,7 +99,7 @@ for i in ${nodes}; do
     rpcport=$((8545+${i}));
     discport=3031${i};
     # ? --verbosity 4 --nodiscover --rpccorsdomain --network=2023
-    docker run --name e${i} -v /var/docker-volumes/vol1/host${i}/root/:/root/ \
+    docker run --name e${i} -v ${VOLUMES}/host${i}/root/:/root/ \
       -dt -p 127.0.0.1:${rpcport}:8545 --expose ${discport} \
       ethereum/client-go --identity=e${i} --datadir=/root/.ethereum/ \
         --verbosity=4 --maxpeers=3 --port ${discport} --nodiscover \
@@ -84,9 +116,9 @@ for i in ${nodes}; do
     enode=$(docker exec -it e${i} geth attach --exec admin.nodeInfo.enode)
     enode=${enode/\[::\]/${ipaddr}}
     if [ ! -z ${enode} ]; then
-      [ -f ${tmpfile} ] && echo ',' >> ${tmpfile} || echo '[' >> ${tmpfile};
+      [ -f ${TMPFILE} ] && echo ',' >> ${TMPFILE} || echo '[' >> ${TMPFILE};
       # remove xterm control symbols while writing into file
-      echo -n ${enode} | sed -e "s/\x0d//" -e "s/\x1b\[.\{1,5\}m//g" >> ${tmpfile}
+      echo -n ${enode} | sed -e "s/\x0d//" -e "s/\x1b\[.\{1,5\}m//g" >> ${TMPFILE}
     fi;
   fi;
 
@@ -98,14 +130,14 @@ for i in ${nodes}; do
 
 done;
 
-if [ -f ${tmpfile} ]; then
-  echo >> ${tmpfile}
-  echo ']' >> ${tmpfile}
+if [ -f ${TMPFILE} ]; then
+  echo >> ${TMPFILE}
+  echo ']' >> ${TMPFILE}
   for i in ${nodes}; do
     echo "[*] node ${i}: generating static-nodes.json"
 
-    nodesFile=/var/docker-volumes/vol1/host${i}/root/.ethereum/geth/static-nodes.json
-    cp -f ${tmpfile} ${nodesFile}
+    nodesFile=${VOLUMES}/host${i}/root/.ethereum/geth/static-nodes.json
+    cp -f ${TMPFILE} ${nodesFile}
   done;
 fi;
 

@@ -1,0 +1,360 @@
+version: v20171010-0230
+
+  Contract: CtdToken is Ownable
+    constructor
+      ✓ should set an owner
+    transferOwnership()
+      ✓ should assign the new owner being called by the old owner
+      ✓ should not allow changing the owner to non-owners
+      ✓ should not allow changing the owner to null or 0 address
+      ✓ should emit OwnershipTransferred on succesful assignment
+    onlyOwner<modifier>
+      ✓ should allow execution if called by the owner
+      ✓ should throw execution if called by non-owners
+  7 passing (6s)
+
+  Contract: CtdToken is PausableOnce
+    constructor
+      ✓ should set pauseMaster to 0
+      ✓ should set pauseEnd to 0
+    setPauseMaster()
+      ✓ should assign the new pauseMaster being called by the owner
+      ✓ should not allow setting the pauseMaster by non-owners
+      ✓ should not allow setting to null or 0 address by the owner
+    pause()
+      before the pause master has been set ...
+        ✓ should throw being called by the owner
+        ✓ should throw being called not by the pause master
+      after the pause master has been set ...
+        ✓ should return true being called by the pause master
+        ✓ ... and should assign pauseEnd
+        ✓ ... and should emit Paused
+        ✓ ... and should throw when called again
+        ✓ should throw being called by the owner
+        ✓ should throw being called not by strangers
+    whenNotPaused<modifier>
+      ✓ should NOT throw if the pause master is yet unset
+      ✓ ... and should NOT throw if called by non-owners
+      after the pause has been set ...
+        ✓ should throw being called during the pause
+        ✓ should NOT throw being called after the pause
+    when the contract is NOT on pause
+      a call by the buyer
+        ✓ should NOT throw error if create() called
+        ✓ should NOT throw error if transfer() called when balance available
+        ✓ should NOT throw error if transferFrom() called when allowance is available
+        ✓ should NOT throw error if approve() called
+        ✓ should NOT throw error if increaseApproval() called
+        ✓ should NOT throw error if decreaseApproval() called
+        ✓ should NOT throw error if withdraw() called when withdrawal is avaliable
+      a call by a stranger
+        ✓ should NOT throw error if create() called
+    when the contract put on pause
+      a call by the buyer
+        ✓ should throw error if create() called
+        ✓ should throw error if transfer() called even if balance is available
+        ✓ should throw error if transferFrom() called even if allowance is available
+        ✓ should throw error if approve() called
+        ✓ should throw error if increaseApproval() called
+        ✓ should throw error if decreaseApproval() called
+        ✓ should throw error if withdraw() called even if withdrawal is avaliable
+      a call by the owner
+        ✓ should throw error if create() called
+        ✓ should throw error if transfer() called even if balance is available
+        ✓ should throw error if transferFrom() called even if allowance is available
+        ✓ should throw error if approve() called
+        ✓ should throw error if increaseApproval() called
+        ✓ should throw error if decreaseApproval() called
+        ✓ should throw error if withdraw() called even if withdrawal is avaliable
+      a call by a stranger
+        ✓ should throw error if create() called
+  40 passing (1m)
+
+
+  Contract: CtdToken is Withdrawable
+    withdrawal()
+      ✓ can NOT be called externally
+      ✓ should not add balances to null or 0 address
+      ✓ should add adding balance to a valid address
+      ✓ should add balances to multiple valid addresses
+      on successful adding the balance ...
+        ✓ ... should emit Withdrawal event
+        ✓ ... should allow adding balance again
+    withdraw()
+      before balance is added ...
+        ✓ ... should throw if called by the owner
+        ✓ ... should throw if called by non-owners
+      after balance is successfully added to a drawer ...
+        ✓ ... should throw if called by the owner
+        ✓ ... should throw if called by non-owners
+        ✓ ... should send ETH balance to the drawer at the his (her) call
+        sending ETH balance to the drawer ...
+          ✓ ... should set the pending amount to 0
+          ✓ ... should decrease the contract ETH balance by the paid amount
+          ✓ ... should emit Withdraw event
+  14 passing (12s)
+
+
+  Contract: CtdToken is StandardToken
+    totalSupply
+      ✓ should return the correct totalSupply
+    balanceOf(_owner)
+      ✓ should return the correct balances
+    transfer(_to, _value)
+      ✓ should transfer tokens within the balance
+      ✓ should throw an error when trying to transfer more than the balance
+      ✓ should throw an error when trying to transfer to null or 0 address
+      when trying to transfer 0 tokens ...
+        ✓ should NOT throw an error
+        ✓ should NOT change balances
+      on successful transfer ...
+        ✓ should return true
+        ✓ should decrease the balance of the transferor
+        ✓ should increase the balance of the transferee
+        ✓ should emit event Transfer(indexed from, indexed to, value)
+    transferFrom(_from, _to, _value)
+      providing the allowance to the transferee is NOT enough ...
+        ✓ ... should throw an error
+      providing the allowance to the transferee is enough ...
+        ... but the transferor's balance is NOT enough ...
+          ✓ ... should throw an error
+        ... if the transferor's balance is enough ...
+          ... but is called by the anybody else except transferee ...
+            ✓ ... should throw an error
+          ... and is called by the transferee ...
+            ✓ ... should return true
+            ✓ ... should decrease the balance of the transferor
+            ✓ ... should increase the balance of the transferee
+            ✓ ... should emit event Transfer(indexed from, indexed to, value)
+            ✓ ... should throw an error if _to address is null or 0
+    approve(_spender, _value)
+      ✓ should set the correct allowance and return true
+      ✓ should emit event Approval(indexed owner, indexed spender, value)
+    allowance(_owner, _spender)
+      ✓ should return zero allowance before approval
+      ✓ should return the correct allowance after approval
+    increaseApproval(_spender, _addedValue)
+      ✓ should increase allowance and return true
+      ✓ should emit event Approval(indexed owner, indexed spender, value)
+    decreaseApproval(_spender, _subtractedValue)
+      ✓ should decrease allowance and return true
+      ✓ should set allowance to 0 if decrease exceeds available amount
+      ✓ should emit event Approval(indexed owner, indexed spender, value)
+    transactions sequence
+      ✓ should increase allowance by 50 then decrease by 10
+  29 passing (28s)
+
+
+  Contract: CtdToken.returnWei()
+    returnWei() function
+      ✓ should trow error if called by strangers
+      if called by the owner...
+        ✓ should throw error if ICO is not yet finished
+        ✓ should throw error if called within 30 days since ICO finihed
+        ✓ should NOT throw error if called after 30 days since ICO finished
+  4 passing (4s)
+
+
+  Contract: CtdToken Phases
+    Phase of the Campaign
+      ✓ should change its state by first call of "create()" if conditions met
+      ✓ should NOT change its state on create() if conditions unmet
+    Pre-start Phase
+      ✓ should start on contract deployment
+      ✓ should NOT switch until the "preIcoOpeningTime"
+      ✓ should switch to "Pre-ICO Phase A" at the "preIcoOpeningTime"
+      ✓ should switch to "Main ICO" on first call of create() after "icoOpeningTime"
+      ✓ should switch to "After ICO" on first call of create() after "icoClosingTime"
+    Pre-ICO Phase A
+      ✓ should switch to "Phase B" if 130M tokens sold out before "icoOpeningTime"
+      ✓ should switch to "(Main) ICO" at "icoOpeningTime" if 130M tokens unsold
+      ✓ should NOT switch before "icoOpeningTime" if 130M tokens unsold
+    Pre-ICO Phase B
+      ✓ should switch to "After ICO" if 650M tokens sold out before "icoOpeningTime"
+      ✓ should switch to "(Main) ICO" at "icoOpeningTime" if 650M tokens unsold
+      ✓ should NOT switch before "icoOpeningTime" if 650M tokens unsold
+    (Main) ICO Phase
+      ✓ should switch to "After ICO" if 650M tokens sold out before "icoClosingTime"
+      ✓ should NOT switch before "icoClosingTime" if 650M tokens unsold
+      ✓ should switch to "After ICO" at "icoClosingTime" if 650M tokens unsold
+    After-ICO Phase
+      ✓ should never end if 650M tokens sold out
+      ✓ should never end after "icoClosingTime"
+  18 passing (31s)
+
+
+  Contract: CtdToken Pre-Start Phase
+    a call of create()
+      ✓ should throw error if a stranger called it
+      ✓ should throw error if the owner called it
+      ✓ should throw error if the bounty called it
+  3 passing (3s)
+
+
+  Contract: CtdToken.create() on Pre-ICO Phase
+    called with 1 ETH when only 0.25 ETH needed for available pre-ICO tokens
+      ✓ should add 378.75 tokens to totalSupply
+      ✓ should add 287.5 tokens to the buyer balance
+      ✓ should add 76 tokens to the owner balance
+      ✓ should add 15.25 tokens to the bounty balance
+      ✓ should add 0.25 Ether to the owner account
+      ✓ should add 0.25 Ether to the total proceeds
+      ✓ should add 0.75 ETH and 0.1 ETH award to withdrawals for the buyer
+      ✓ should emit Withdrawal event on overpaid 0.75 ETH
+      ✓ should emit NewTokens event on 378.75 tokens
+      ✓ should emit NewFunds event on 0.25 Ether
+      ✓ should emit Withdrawal event with 0.1 ETH award
+      ✓ should emit NewPhase event with Main ICO Phase
+  12 passing (2s)
+
+
+  Contract: CtdToken Pre-ICO Phase A
+    a call from buyer of "create()" with value of 1 ETH
+      ✓ should add 1515 tokens to totalSupply
+      ✓ should add 1150 tokens to the buyer balance
+      ✓ should add 304 tokens to the owner balance
+      ✓ should add 61 tokens to the bounty balance
+      ✓ should add 1 Ether to the owner account
+    a call by the owner
+      ✓ should NOT throw error if create() called
+      ✓ should throw error if transfer() called and balance available
+      ✓ should throw error if transferFrom() called and allowance available
+      ✓ should throw error if approve() called
+      ✓ should throw error if increaseApproval() called
+      ✓ should throw error if decreaseApproval() called
+    a call by the buyer
+      ✓ should NOT throw error if transfer() called and balance available
+      ✓ should NOT throw error if transferFrom() called and allowance available
+      ✓ should NOT throw error if approve() called
+      ✓ should NOT throw error if increaseApproval() called
+      ✓ should NOT throw error if decreaseApproval() called
+    a call by the bounty
+      ✓ should NOT throw error if create() called
+      ✓ should NOT throw error if transfer() called and balance available
+      ✓ should NOT throw error if transferFrom() called and allowance available
+      ✓ should NOT throw error if approve() called
+      ✓ should NOT throw error if increaseApproval() called
+      ✓ should NOT throw error if decreaseApproval() called
+  22 passing (35s)
+
+
+  Contract: CtdToken Pre-ICO Phase B
+    a call from buyer of "create()" with value of 1 ETH
+      ✓ should add 1450 tokens to totalSupply
+      ✓ should add 1100 tokens to the buyer balance
+      ✓ should add 292 tokens to the owner balance
+      ✓ should add 58 tokens to the bounty balance
+      ✓ should add 1 Ether to the owner account
+    a call by the owner
+      ✓ should NOT throw error if create() called
+      ✓ should throw error if transfer() called and balance available
+      ✓ should throw error if transferFrom() called and allowance available
+      ✓ should throw error if approve() called
+      ✓ should throw error if increaseApproval() called
+      ✓ should throw error if decreaseApproval() called
+    a call by the buyer
+      ✓ should NOT throw error if transfer() called and balance available
+      ✓ should NOT throw error if transferFrom() called and allowance available
+      ✓ should NOT throw error if approve() called
+      ✓ should NOT throw error if increaseApproval() called
+      ✓ should NOT throw error if decreaseApproval() called
+    a call by the bounty
+      ✓ should NOT throw error if create() called
+      ✓ should NOT throw error if transfer() called and balance available
+      ✓ should NOT throw error if transferFrom() called and allowance available
+      ✓ should NOT throw error if approve() called
+      ✓ should NOT throw error if increaseApproval() called
+      ✓ should NOT throw error if decreaseApproval() called
+  22 passing (38s)
+
+
+  Contract: CtdToken Main ICO Phase
+    a call from buyer of "create()" with value of 1 ETH
+      ✓ should add 1315 tokens to totalSupply
+      ✓ should add 1000 tokens to the buyer balance
+      ✓ should add 263 tokens to the owner balance
+      ✓ should add 52 tokens to the bounty balance
+      ✓ should add 1 Ether to the owner account
+    a call by the owner
+      ✓ should NOT throw error if create() called
+      ✓ should throw error if transfer() called and balance available
+      ✓ should throw error if transferFrom() called and allowance available
+      ✓ should throw error if approve() called
+      ✓ should throw error if increaseApproval() called
+      ✓ should throw error if decreaseApproval() called
+    a call by the buyer
+      ✓ should NOT throw error if transfer() called and balance available
+      ✓ should NOT throw error if transferFrom() called and allowance available
+      ✓ should NOT throw error if approve() called
+      ✓ should NOT throw error if increaseApproval() called
+      ✓ should NOT throw error if decreaseApproval() called
+    a call by the bounty
+      ✓ should NOT throw error if create() called
+      ✓ should NOT throw error if transfer() called and balance available
+      ✓ should NOT throw error if transferFrom() called and allowance available
+      ✓ should NOT throw error if approve() called
+      ✓ should NOT throw error if increaseApproval() called
+      ✓ should NOT throw error if decreaseApproval() called
+  22 passing (37s)
+
+
+  Contract: CtdToken After ICO Phase
+    a call by the owner
+      ✓ should throw error if create() called
+      ✓ should NOT throw error if transfer() called and balance available
+      ✓ should NOT throw error if transferFrom() called and allowance available
+      ✓ should NOT throw error if approve() called
+      ✓ should NOT throw error if increaseApproval() called
+      ✓ should NOT throw error if decreaseApproval() called
+    a call by the buyer
+      ✓ should throw error if create() called
+      ✓ should NOT throw error if transfer() called and balance available
+      ✓ should NOT throw error if transferFrom() called and allowance available
+      ✓ should NOT throw error if approve() called
+      ✓ should NOT throw error if increaseApproval() called
+      ✓ should NOT throw error if decreaseApproval() called
+    a call by the bounty
+      ✓ should throw error if create() called
+      ✓ should NOT throw error if transfer() called and balance available
+      ✓ should NOT throw error if transferFrom() called and allowance available
+      ✓ should NOT throw error if approve() called
+      ✓ should NOT throw error if increaseApproval() called
+      ✓ should NOT throw error if decreaseApproval() called
+  18 passing (45s)
+
+
+  Contract: CtdToken ICO campaign
+    create() called on Phase A with value worth all ICO tokens at Phase A rate plus one ETH
+      ✓ should set totalSupply to 130M tokens
+      ✓ should set buyer balance to 98.67986798679867M tokens
+      ✓ should set owner balance to 26.085808580858085M tokens
+      ✓ should set bounty balance to 5.234323432343234M tokens
+      ✓ should add 85808.580858085808580858 ETH to the owner account
+      ✓ should set totalProceeds to 85808.580858085808580858 ETH
+      ✓ should set withdrawals for the buyer to 343235.423432343234323432 ETH
+    create() during ICO Phase with ETH value leaving tokens worth 0.25 ETH only
+      ✓ should set totalSupply to 649.99967125M tokens
+      ✓ should set totalProceeds to 481245.593215500257250059 ETH
+    create() during ICO Phase with 1 ETH when only 0.25 ETH worth tokens unsold
+      ✓ should add 328.75 tokens to totalSupply
+      ✓ should add 250 tokens to the buyer balance
+      ✓ should add 65.75 tokens to the owner balance
+      ✓ should add 13 tokens to the bounty balance
+      ✓ should add 0.25 Ether to the owner account
+      ✓ should add 0.25 Ether to the total proceeds
+      ✓ should add 0.75 ETH and 0.5 ETH award to withdrawals for the buyer
+      ✓ should emit Withdrawal event on overpaid 0.75 ETH
+      ✓ should emit NewTokens event on 328.75 tokens
+      ✓ should emit NewFunds event on 0.25 Ether
+      ✓ should emit Withdrawal event with 0.5 ETH award
+      ✓ should emit NewPhase event with Main ICO Phase
+    the entire campaign
+      ✓ should set totalSupply to 650M tokens
+      ✓ should set buyer balance to 494.11713034421314M tokens
+      ✓ should set owner balance to 130.08580858085807M tokens
+      ✓ should set bounty balance to 25.797061074928788M tokens
+      ✓ should set totalSupply to the sum of customer', owner' and bounty' tokens
+      ✓ should add 481245.843215500257250059 ETH to the owner account
+      ✓ should set totalProceeds to 481245.843215500257250059 ETH
+  28 passing (4s)
+

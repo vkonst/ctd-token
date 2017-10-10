@@ -113,22 +113,15 @@ $ `sha256sum contracts/*.sol`<br />
 `2fe1dfeec7fd85c6d071b36c25509fe2e94a3fc86c68640400b555eb3bb7235e  UpgradableToken.sol`<br />
 `cc25f011784254b7e0e9c1dc5667cf5da37ce06d1c1148299fd6ed70b97c37d5  Withdrawable.sol`<br />
 
+Flatten contract Swarm Source:<br>
+`bzzr://971257ac6d1a00f0a1fab959d4564bbe517e87f0e12b66c4b9795e185e775185`
+
+**Ropsten:**<br/>
+<a href="https://ropsten.etherscan.io/address/0x46f3d0f7a2bd8b44eefdce89b01cd9b0fda6ccab">0x46f3d0f7a2bd8b44eefdce89b01cd9b0fda6ccab</a>
+
 ... details soon follow...
 
 
-#### Setup and tests
+#### Setup & Test 
+Please refer to <a href="../doc/README.md">doc/README.md</a>
 
-**tests**<br/>
-$ `truffle test`
-
-**lint**<br/>
-$ `solium --dir contracts`
- 
-**pre-requisits:**
-
-$ `sudo npm i -g truffle` <br />
-$ `sudo npm i -g ethereumjs-testrpc` <br />
-$ `sudo npm i -g solium` <br/>
-$ `npm install` <br />
-
-_Bash scripts from ./script may be helpful._

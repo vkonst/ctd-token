@@ -7,7 +7,8 @@
   "scripts": {
     "compile": "truffle compile",
     "test": "truffle test",
-    "deploy": "truffle migrate"
+    "deploy": "truffle migrate",
+    "build-contracts": "node node_modules/sol-merger/bin/sol-merger.js './contracts/*.sol' './build/flatten'"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
     "babel-register": "^6.26.0",
     "bignumber.js": "^4.0.4",
     "reporter-file": "^1.0.0",
+    "sol-merger": "^0.1.0",
     "truffle-contract": "^3.0.0",
     "web3": "^1.0.0-beta.22"
   }

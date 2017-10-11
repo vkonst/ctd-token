@@ -113,8 +113,10 @@ $ `sha256sum contracts/*.sol`<br />
 `2fe1dfeec7fd85c6d071b36c25509fe2e94a3fc86c68640400b555eb3bb7235e  UpgradableToken.sol`<br />
 `cc25f011784254b7e0e9c1dc5667cf5da37ce06d1c1148299fd6ed70b97c37d5  Withdrawable.sol`<br />
 
-Flatten contract Swarm Source:<br>
-`bzzr://971257ac6d1a00f0a1fab959d4564bbe517e87f0e12b66c4b9795e185e775185`
+**Flatten contract**<br>
+`# Swarm Source: `bzzr://971257ac6d1a00f0a1fab959d4564bbe517e87f0e12b66c4b9795e185e775185`<br/>
+`$ sha256sum build/flatten/CtdToken.sol` <br/>
+`60fe9963d9caed24f0b45bd8a46a65cdfc5191d6e5197fb27fec08525a9effde`
 
 **Ropsten:**<br/>
 <a href="https://ropsten.etherscan.io/address/0x46f3d0f7a2bd8b44eefdce89b01cd9b0fda6ccab">0x46f3d0f7a2bd8b44eefdce89b01cd9b0fda6ccab</a>

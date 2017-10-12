@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <pre>
+        This code is supposed to run in a browser with MetaMask plugin enabled.<br>
+        You can call functions in the debugger console. Start with ctdDebug.init().<br/>
+        Ex.:<br/>
+        > ctdDebug.init(&lt;your_contract_address&gt;);                     // default: ctdDebug.init();
+        > ctdDebug.setOriginalOwner(&lt;your_original_owner_address&gt;);   // it changes the default address
+        > ctdDebug.transferOwnership(&lt;your_owner_address&gt;);           // default: ctdDebug.transferOwnership();
+        > ctdDebug.setBounty(&lt;your_bounty_address&gt;);                  // default: ctdDebug.setBounty();
+        > ctdDebug.setPauseMaster(&lt;your_masater_address&gt;);            // default: ctdDebug.setPauseMaster();
+        > ctdDebug.setUpgradeMaster(&lt;your_master_address&gt;);           // default: ctdDebug.setUpgradeMaster();
+    </pre>
+</div>
+
+</body>
+<script>
+    /*global web3*/
+
+    var ctdDebug;
+
+    window.addEventListener('load', function() {
+
+        if (typeof web3 !== 'undefined') {
+            window.web3 = new Web3(web3.currentProvider);
+        } else {
+            console.log('No web3? You should consider trying MetaMask!');
+        }
+
+        ctdDebug = injectCtdDebug();
+        console.log('ctdDebug injected');
+        console.log('... start with \'ctdDebug.init(<optional_contract_address>)\'..');
+
+    });
+
+    function injectCtdDebug() {
+        "use strict";
+
+        var ctdDebug = {addresses: {}, contract: {}};
+
+        ctdDebug.addresses.conractAddress = '0x46F3d0f7A2BD8b44eEfDce89B01CD9B0FDa6CcaB';
+        ctdDebug.addresses.originalOwner = '0xc92F4D39cD0fDb7E27cABFa888bd679DF40d90ad';
+        ctdDebug.addresses.owner = '0xf90bfC49e3FA519b28Fcb55141Be23429cA196CE';
+        ctdDebug.addresses.bounty = '0xf1E8ACC0E973670599327c4105CB3587B8582a86';
+        ctdDebug.addresses.buyer = '0x6704Fbfcd5Ef766B287262fA2281C105d57246a6';
+        ctdDebug.addresses.pauseMaster = '0x66Ed34D11380107724944602B2D8C246e9113fBD';
+        ctdDebug.addresses.upgradeMaster = '0xbe5d1Cf484cb611b4feB96CDE6926Bbce75C6804';
+
+        ctdDebug.init = function (address) {
+            if (address) ctdDebug.addresses.conractAddress = address;
+            ctdDebug.contract.abi = getAbi();
+            ctdDebug.contract.instance = web3.eth.contract(ctdDebug.contract.abi)
+                .at(ctdDebug.addresses.contractAddress);
+            subscribeToAllEvents();
+        };
+
+        ctdDebug.setOriginalOwner = function (address) {
+            if (address) ctdDebug.addresses.originalOwner = address;
+        };
+
+        ctdDebug.transferOwnership = function (address) {
+            ctdDebug.contract.instance.transferOwnership.sendTransaction(
+                ctdDebug.addresses.owner,
+                {from: address ? address : ctdDebug.addresses.originalOwner},
+                logToConsole
+            );
+        };
+
+        ctdDebug.setBounty = function (address) {
+            ctdDebug.contract.instance.setBounty.sendTransaction(
+                ctdDebug.addresses.bounty,
+                {from: address ? address : ctdDebug.addresses.owner},
+                logToConsole
+            );
+        };
+
+        ctdDebug.setPauseMaster = function (address) {
+            ctdDebug.contract.instance.setPauseMaster.sendTransaction(
+                ctdDebug.addresses.pauseMaster,
+                {from: address ? address : ctdDebug.addresses.owner},
+                logToConsole
+            );
+        };
+
+        ctdDebug.setUpgradeMaster = function (address) {
+            ctdDebug.contract.instance.setUpgradeMaster.sendTransaction(
+                ctdDebug.addresses.upgradeMaster,
+                {from: address ? address : ctdDebug.addresses.owner},
+                logToConsole
+            );
+        };
+
+        ctdDebug.create = function (wei, address) {
+            ctdDebug.contract.instance.create.sendTransaction(
+                {from: address ? address : ctdDebug.addresses.buyer, value: wei ? wei : 1000},
+                logToConsole
+            );
+        };
+
+        return ctdDebug;
+
+
+        function subscribeToAllEvents() {
+            ctdDebug.contract.instance.Approval().watch(logEvenToConsole);
+            ctdDebug.contract.instance.NewTokens().watch(logEvenToConsole);
+            ctdDebug.contract.instance.NewFunds().watch(logEvenToConsole);
+            ctdDebug.contract.instance.OwnershipTransferred().watch(logEvenToConsole);
+            ctdDebug.contract.instance.Paused().watch(logEvenToConsole);
+            ctdDebug.contract.instance.Transfer().watch(logEvenToConsole);
+            ctdDebug.contract.instance.Upgrade().watch(logEvenToConsole);
+            ctdDebug.contract.instance.Withdrawal().watch(logEvenToConsole);
+            ctdDebug.contract.instance.Withdraw().watch(logEvenToConsole);
+        }
+
+        function logToConsole(error, result) {
+            if (!error) {
+                console.log('** result', result);
+                if (result.transactionHash)
+                    console.log('** result.transactionHash', result.transactionHash);
+                if (result.args)
+                    console.log('** result.args', result.args);
+            } else {
+                console.log(error);
+            }
+        }
+
+        function logEvenToConsole() {
+            console.log("*** Event ***");
+            logToConsole.apply(this, arguments);
+        }
+
+        function getAbi() {
+            return [
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "name",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "string"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_spender",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "approve",
+                    "outputs": [
+                        {
+                            "name": "success",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_pauseMaster",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "setPauseMaster",
+                    "outputs": [
+                        {
+                            "name": "success",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "totalSupply",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_from",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_to",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "transferFrom",
+                    "outputs": [
+                        {
+                            "name": "success",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "icoOpeningTime",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint64"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "decimals",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint8"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [],
+                    "name": "withdraw",
+                    "outputs": [
+                        {
+                            "name": "success",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [],
+                    "name": "returnWei",
+                    "outputs": [],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "upgrade",
+                    "outputs": [],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "closingTime",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint64"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "upgradeAgent",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "upgradeMaster",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_spender",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_subtractedValue",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "decreaseApproval",
+                    "outputs": [
+                        {
+                            "name": "success",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [
+                        {
+                            "name": "_owner",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "balanceOf",
+                    "outputs": [
+                        {
+                            "name": "balance",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [],
+                    "name": "pause",
+                    "outputs": [
+                        {
+                            "name": "success",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "owner",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "bounty",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "symbol",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "string"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_to",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "transfer",
+                    "outputs": [
+                        {
+                            "name": "success",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_upgradeAgent",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_revision",
+                            "type": "uint32"
+                        }
+                    ],
+                    "name": "setUpgradeAgent",
+                    "outputs": [],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "phase",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint8"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_bounty",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "setBounty",
+                    "outputs": [
+                        {
+                            "name": "success",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "pauseMaster",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "totalUpgraded",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_spender",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_addedValue",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "increaseApproval",
+                    "outputs": [
+                        {
+                            "name": "success",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "pauseEnd",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint64"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [
+                        {
+                            "name": "_owner",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_spender",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "allowance",
+                    "outputs": [
+                        {
+                            "name": "remaining",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "REVISION",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint32"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [],
+                    "name": "create",
+                    "outputs": [
+                        {
+                            "name": "success",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": true,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "totalProceeds",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "newOwner",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "transferOwnership",
+                    "outputs": [],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "preIcoOpeningTime",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint64"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "returnAllowedTime",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint64"
+                        }
+                    ],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_upgradeMaster",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "setUpgradeMaster",
+                    "outputs": [],
+                    "payable": false,
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "name": "_preIcoOpeningTime",
+                            "type": "uint64"
+                        }
+                    ],
+                    "payable": true,
+                    "type": "constructor"
+                },
+                {
+                    "payable": true,
+                    "type": "fallback"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": false,
+                            "name": "amount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "NewTokens",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": false,
+                            "name": "funder",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "NewFunds",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": false,
+                            "name": "phase",
+                            "type": "uint8"
+                        }
+                    ],
+                    "name": "NewPhase",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": true,
+                            "name": "drawer",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "name": "weiAmount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "Withdrawal",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": true,
+                            "name": "drawer",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "name": "weiAmount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "Withdraw",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [],
+                    "name": "Paused",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": true,
+                            "name": "_from",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "name": "_value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "Upgrade",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": false,
+                            "name": "agent",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "UpgradeEnabled",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": true,
+                            "name": "previousOwner",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": true,
+                            "name": "newOwner",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "OwnershipTransferred",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": true,
+                            "name": "owner",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": true,
+                            "name": "spender",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "Approval",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": true,
+                            "name": "from",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": true,
+                            "name": "to",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "Transfer",
+                    "type": "event"
+                }
+            ];
+        }
+    }
+
+</script>
+</html>

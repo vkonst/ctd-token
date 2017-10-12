@@ -7,6 +7,7 @@
   "scripts": {
     "compile": "truffle compile",
     "test": "truffle test",
+    "test-manual": "node test/helpers/staticHttpServer.js",
     "deploy": "truffle migrate",
     "build-contracts": "node node_modules/sol-merger/bin/sol-merger.js './contracts/*.sol' './build/flatten'"
   },
@@ -32,7 +33,9 @@
     "babel-preset-stage-3": "^6.24.1",
     "babel-register": "^6.26.0",
     "bignumber.js": "^4.0.4",
+    "connect": "^3.6.5",
     "reporter-file": "^1.0.0",
+    "serve-static": "^1.13.1",
     "sol-merger": "^0.1.0",
     "truffle-contract": "^3.0.0",
     "web3": "^1.0.0-beta.22"

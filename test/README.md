@@ -15,6 +15,6 @@ $ `truffle test`
 
 or
 
-$ `export DUMP=1; ./scripts/js-test "Ownable Once Withdrawable StandardToken Wei ChangeLogic preStart preIcoLimit preIcoA preIcoB mainIco afterIco Campaign" --verbose-rpc`
+$ `export DUMP=1; ./scripts/js-test "Ownable Once Withdrawable Upgradable StandardToken Wei ChangeLogic preStart preIcoLimit preIcoA preIcoB mainIco afterIco Campaign" --verbose-rpc`
 
 Unit test report: <a href="log/u-test_report.lst">log/u-test_report.lst</a>

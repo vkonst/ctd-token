@@ -1,4 +1,4 @@
-version: v20171010-0230
+version: v20171011-0530
 
   Contract: CtdToken is Ownable
     constructor
@@ -70,7 +70,6 @@ version: v20171010-0230
         ✓ should throw error if create() called
   40 passing (1m)
 
-
   Contract: CtdToken is Withdrawable
     withdrawal()
       ✓ can NOT be called externally
@@ -92,8 +91,39 @@ version: v20171010-0230
           ✓ ... should set the pending amount to 0
           ✓ ... should decrease the contract ETH balance by the paid amount
           ✓ ... should emit Withdraw event
-  14 passing (12s)
+  14 passing (13s)
 
+  Contract: CtdToken is Upgradable
+    setUpgradeMaster()
+      ✓ should assign the upgrade master being called by the owner
+      ✓ should throw error if called by non-owners
+      ✓ should throw error if called with null or 0 address
+    setUpgradeAgent()
+      ✓ should throw error if called by owners
+      ✓ should throw error if called by non-owners
+      if called by the upgrade master...
+        ✓ ... should throw error if invalid revision provided
+        ✓ ... should throw error if the agent provides invalid revision
+        ✓ ... should throw error if the agent provides invalid total supply
+        ✓ ... should set the agent if it provides correct revision and total supply
+        ✓ ... should allow setting the agent once only
+    upgrade()
+      ✓ should throw error if called by the owner before the agent is set
+      ✓ should throw error if called by the buyer before the agent is set
+      ✓ should throw error if called by the buyer before the agent is set
+      ✓ should NOT throw error if called by the buyer after the agent is set
+    upgrade() called after the agent is correctly set
+      ✓ should decrease balance of the holder on the contract being upgraded from
+      ✓ should decrease totalSupply of the contract being upgraded from
+      ✓ should increase totalUpgraded of the contract being upgraded from
+      ✓ should increase balance of the holder on the contract being upgraded to
+      ✓ should throw error if called by non-holders
+      ✓ should set the balance of the holder on the old contract to 0 if all tokens upgraded
+      ✓ should throw error on upgarding more tokens then the balance is
+      ✓ should set totalSupply to 0 when tokens of all holders upgraded
+      ✓ should set totalUpgraded to the original supply when tokens of all holders upgraded
+      ✓ should throw errow if called when tokens of all holders upgraded
+  24 passing (28s)
 
   Contract: CtdToken is StandardToken
     totalSupply
@@ -142,8 +172,7 @@ version: v20171010-0230
       ✓ should emit event Approval(indexed owner, indexed spender, value)
     transactions sequence
       ✓ should increase allowance by 50 then decrease by 10
-  29 passing (28s)
-
+  29 passing (27s)
 
   Contract: CtdToken.returnWei()
     returnWei() function
@@ -152,8 +181,7 @@ version: v20171010-0230
         ✓ should throw error if ICO is not yet finished
         ✓ should throw error if called within 30 days since ICO finihed
         ✓ should NOT throw error if called after 30 days since ICO finished
-  4 passing (4s)
-
+  4 passing (3s)
 
   Contract: CtdToken Phases
     Phase of the Campaign
@@ -180,8 +208,7 @@ version: v20171010-0230
     After-ICO Phase
       ✓ should never end if 650M tokens sold out
       ✓ should never end after "icoClosingTime"
-  18 passing (31s)
-
+  18 passing (32s)
 
   Contract: CtdToken Pre-Start Phase
     a call of create()
@@ -189,7 +216,6 @@ version: v20171010-0230
       ✓ should throw error if the owner called it
       ✓ should throw error if the bounty called it
   3 passing (3s)
-
 
   Contract: CtdToken.create() on Pre-ICO Phase
     called with 1 ETH when only 0.25 ETH needed for available pre-ICO tokens
@@ -206,7 +232,6 @@ version: v20171010-0230
       ✓ should emit Withdrawal event with 0.1 ETH award
       ✓ should emit NewPhase event with Main ICO Phase
   12 passing (2s)
-
 
   Contract: CtdToken Pre-ICO Phase A
     a call from buyer of "create()" with value of 1 ETH
@@ -237,7 +262,6 @@ version: v20171010-0230
       ✓ should NOT throw error if decreaseApproval() called
   22 passing (35s)
 
-
   Contract: CtdToken Pre-ICO Phase B
     a call from buyer of "create()" with value of 1 ETH
       ✓ should add 1450 tokens to totalSupply
@@ -265,8 +289,7 @@ version: v20171010-0230
       ✓ should NOT throw error if approve() called
       ✓ should NOT throw error if increaseApproval() called
       ✓ should NOT throw error if decreaseApproval() called
-  22 passing (38s)
-
+  22 passing (37s)
 
   Contract: CtdToken Main ICO Phase
     a call from buyer of "create()" with value of 1 ETH
@@ -320,7 +343,7 @@ version: v20171010-0230
       ✓ should NOT throw error if approve() called
       ✓ should NOT throw error if increaseApproval() called
       ✓ should NOT throw error if decreaseApproval() called
-  18 passing (45s)
+  18 passing (44s)
 
 
   Contract: CtdToken ICO campaign
@@ -356,5 +379,5 @@ version: v20171010-0230
       ✓ should set totalSupply to the sum of customer', owner' and bounty' tokens
       ✓ should add 481245.843215500257250059 ETH to the owner account
       ✓ should set totalProceeds to 481245.843215500257250059 ETH
-  28 passing (4s)
+  28 passing (5s)
 

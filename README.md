@@ -106,6 +106,11 @@ Should the owner fail to perform a proper setup before the start of the token sa
 
 ### Bug Bounty Program
 
+Please refer to <a href="https://www.reddit.com/r/ethdev/comments/75x5kb/bug_bountyico_cointed_token_audit_100k_reward/">
+the terms and conditions
+</a>.<br/>
+
+**Source code files**<br>
 $ `sha256sum contracts/*.sol`<br />
 `3dc564c3fac6de6bd0c21d437400c489375dc5098353057c2e5ea74730d8f9ef  CtdToken.sol`<br />
 `f3c312a90c3b4d2c4b19d50c171b54917f083f8d0ae446206dd64233600627dc  InterfaceUpgradeAgent.sol`<br />
@@ -114,15 +119,12 @@ $ `sha256sum contracts/*.sol`<br />
 `cc25f011784254b7e0e9c1dc5667cf5da37ce06d1c1148299fd6ed70b97c37d5  Withdrawable.sol`<br />
 
 **Flatten contract**<br>
-`# Swarm Source: `bzzr://971257ac6d1a00f0a1fab959d4564bbe517e87f0e12b66c4b9795e185e775185`<br/>
+`# Swarm Source: bzzr://971257ac6d1a00f0a1fab959d4564bbe517e87f0e12b66c4b9795e185e775185`<br/>
 `$ sha256sum build/flatten/CtdToken.sol` <br/>
 `60fe9963d9caed24f0b45bd8a46a65cdfc5191d6e5197fb27fec08525a9effde`
 
 **Ropsten:**<br/>
 <a href="https://ropsten.etherscan.io/address/0x46f3d0f7a2bd8b44eefdce89b01cd9b0fda6ccab">0x46f3d0f7a2bd8b44eefdce89b01cd9b0fda6ccab</a>
-
-... details soon follow...
-
 
 #### Setup & Test 
 Please refer to <a href="../doc/README.md">doc/README.md</a>

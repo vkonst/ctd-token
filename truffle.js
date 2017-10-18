@@ -19,11 +19,22 @@ module.exports = {
             host: "localhost",
             port: 8546,
             network_id: "3"
+        },
+
+        /*
+            settings assume the TCP port 8549 on the host running 'truffle' is forwarded via ssh
+            to the host running the Ethereum node (client) with the RPC port 8545:
+            localUser@nodeHost:~$ ssh remoteUser@truffleRunningHost -L 8049:localhost:8545
+        */
+        main: {
+            host: "localhost",
+            port: 8549,
+            network_id: "1"
         }
 
     },
 
-    gasPrice: 100e9,
+    // gasPrice: 100e9,
 
     mocha: {
         useColors: false,

@@ -1,8 +1,11 @@
-module.exports = function(deployer) {
+module.exports = function(deployer, network) {
     'use strict';
 
     console.warn('1_initial_migration.js called');
 
-    const Migrations = artifacts.require("./lib/truffle/Migrations");
-    deployer.deploy(Migrations);
+    if (network !== "main") {
+        const Migrations = artifacts.require("./lib/truffle/Migrations");
+        deployer.deploy(Migrations);
+    }
+
 };

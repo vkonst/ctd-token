@@ -6,6 +6,11 @@ import './UpgradableToken.sol';
 import './Withdrawable.sol';
 
 
+/**
+ * @title Cointed Token
+ * @dev Cointed Token (CTD) and Token Sale (ICO).
+ */
+
 contract CtdToken is UpgradableToken, PausableOnce, Withdrawable {
 
     using SafeMath for uint256;
@@ -82,30 +87,41 @@ contract CtdToken is UpgradableToken, PausableOnce, Withdrawable {
     uint256 public totalProceeds;
 
     /*
-    * @param _preIcoOpeningTime Timestamp when the Pre-ICO (Phase A) shall start
-    * msg.value MUST be at least the sum of awards
-    */
+     * @dev constructor
+     * @param _preIcoOpeningTime Timestamp when the Pre-ICO (Phase A) shall start.
+     * msg.value MUST be at least the sum of awards.
+     */
     function CtdToken(uint64 _preIcoOpeningTime) payable {
         require(_preIcoOpeningTime > now);
 
-        owner = msg.sender;
         preIcoOpeningTime = _preIcoOpeningTime;
         icoOpeningTime = preIcoOpeningTime + PRE_ICO_DURATION;
         closingTime = icoOpeningTime + ICO_DURATION;
     }
 
-    /// @dev Fallback function delegates the request to create().
+    /*
+     * @dev Fallback function delegates the request to create().
+     */
     function () payable external {
         create();
     }
 
-    function setBounty(address _bounty) onlyOwner public returns (bool success) {
-
+    /**
+     * @dev Set the address of the holder of bounty tokens.
+     * @param _bounty The address of the bounty token holder.
+     * @return success/failure
+     */
+    function setBounty(address _bounty) onlyOwner external returns (bool success) {
         require(_bounty != address(0));
         bounty = _bounty;
         return true;
     }
 
+    /**
+     * @dev Mint tokens and add them to the balance of the message.sender.
+     * Additional tokens are minted and added to the owner and the bounty balances.
+     * @return success/failure
+     */
     function create() payable whenNotClosed whenNotPaused public returns (bool success) {
         require(msg.value > 0);
         require(now >= preIcoOpeningTime);
@@ -159,7 +175,10 @@ contract CtdToken is UpgradableToken, PausableOnce, Withdrawable {
         return true;
     }
 
-    function returnWei() onlyOwner whenClosed afterWithdrawPause public {
+    /**
+     * @dev Send the value (ethers) that the contract holds to the owner address.
+     */
+    function returnWei() onlyOwner whenClosed afterWithdrawPause external {
         owner.transfer(this.balance);
     }
 
@@ -248,55 +267,103 @@ contract CtdToken is UpgradableToken, PausableOnce, Withdrawable {
         NewPhase(phase);
     }
 
+    /**
+     * @dev Transfer tokens to the specified address.
+     * @param _to The address to transfer to.
+     * @param _value The amount of tokens to be transferred.
+     * @return success/failure
+     */
     function transfer(address _to, uint256 _value)
         whenNotPaused limitForOwner public returns (bool success)
     {
         return super.transfer(_to, _value);
     }
 
+    /**
+     * @dev Transfer tokens from one address to another.
+     * @param _from address The address which you want to send tokens from.
+     * @param _to address The address which you want to transfer to.
+     * @param _value the amount of tokens to be transferred.
+     * @return success/failure
+     */
     function transferFrom(address _from, address _to, uint256 _value)
         whenNotPaused limitForOwner public returns (bool success)
     {
         return super.transferFrom(_from, _to, _value);
     }
 
+    /**
+     * @dev Approve the specified address to spend the specified amount of tokens on behalf of the msg.sender.
+     * @param _spender The address which will spend the funds.
+     * @param _value The amount of tokens to be spent.
+     * @return success/failure
+     */
     function approve(address _spender, uint256 _value)
         whenNotPaused limitForOwner public returns (bool success)
     {
+        require((_value == 0) || (allowed[msg.sender][_spender] == 0));
         return super.approve(_spender, _value);
     }
 
+    /**
+     * @dev Increase the approval for the passed address to spend tokens on behalf of the msg.sender.
+     * @param _spender The address which will spend the funds.
+     * @param _addedValue The amount of tokens to increase the approval with.
+     * @return success/failure
+     */
     function increaseApproval(address _spender, uint _addedValue)
         whenNotPaused limitForOwner public returns (bool success)
     {
         return super.increaseApproval(_spender, _addedValue);
     }
 
+    /**
+     * @dev Decrease the approval for the passed address to spend tokens on behalf of the msg.sender.
+     * @param _spender The address which will spend the funds.
+     * @param _subtractedValue The amount of tokens to decrease the approval with.
+     * @return success/failure
+     */
     function decreaseApproval(address _spender, uint _subtractedValue)
         whenNotPaused limitForOwner public returns (bool success)
     {
         return super.decreaseApproval(_spender, _subtractedValue);
     }
 
+    /*
+     * @dev Withdraw the allowed value (ethers) from the contract balance.
+     * @return success/failure
+     */
     function withdraw() whenNotPaused public returns (bool success) {
         return super.withdraw();
     }
 
+    /**
+     * @dev Throws if called when ICO is active.
+     */
     modifier whenClosed() {
         require(phase == Phases.AfterIco);
         _;
     }
 
+    /**
+     * @dev Throws if called when ICO is completed.
+     */
     modifier whenNotClosed() {
         require(phase != Phases.AfterIco);
         _;
     }
 
+    /**
+     * @dev Throws if called by the owner before ICO is completed.
+     */
     modifier limitForOwner() {
         require((msg.sender != owner) || (phase == Phases.AfterIco));
         _;
     }
 
+    /**
+     * @dev Throws if called before returnAllowedTime.
+     */
     modifier afterWithdrawPause() {
         require(now > returnAllowedTime);
         _;

@@ -90,7 +90,7 @@ version: v20171011-0530
         sending ETH balance to the drawer ...
           ✓ ... should set the pending amount to 0
           ✓ ... should decrease the contract ETH balance by the paid amount
-          ✓ ... should emit Withdraw event
+          ✓ ... should emit Withdrawn event
   14 passing (13s)
 
   Contract: CtdToken is Upgradable

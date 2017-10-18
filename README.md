@@ -104,27 +104,34 @@ _Safe Defaults_
 Should the owner fail to perform a proper setup before the start of the token sale, then the contract will automatically assign its owner to critical functions.
 
 
-### Bug Bounty Program
-
-Please refer to <a href="https://www.reddit.com/r/ethdev/comments/75x5kb/bug_bountyico_cointed_token_audit_100k_reward/">
-the terms and conditions
-</a>.<br/>
+### Check sums and contract address
 
 **Source code files**<br>
 $ `sha256sum contracts/*.sol`<br />
-`3dc564c3fac6de6bd0c21d437400c489375dc5098353057c2e5ea74730d8f9ef  CtdToken.sol`<br />
+`e06ff9ec2024215d0beda009dcd115ff07469d23ce03c135eb8426ea781fa85f  CtdToken.sol`<br />
 `f3c312a90c3b4d2c4b19d50c171b54917f083f8d0ae446206dd64233600627dc  InterfaceUpgradeAgent.sol`<br />
-`ab900efc07d968b2eba5579f555505205500b7156a5e8cd1622a7a7b42486d2b  PausableOnce.sol`<br />
-`2fe1dfeec7fd85c6d071b36c25509fe2e94a3fc86c68640400b555eb3bb7235e  UpgradableToken.sol`<br />
-`cc25f011784254b7e0e9c1dc5667cf5da37ce06d1c1148299fd6ed70b97c37d5  Withdrawable.sol`<br />
+`20458a1a20f5c9b6e03b1d217edae935beff9ae82555074a50abfe86c790b85b  PausableOnce.sol`<br />
+`3e5bb94ddd5f24abbf854df1d4876561369ffef089042b7be0656464d278b5aa  UpgradableToken.sol`<br />
+`478f21798d3877586c37a08c5d459cd51e6a05bfaa749612fc13eda8d7ba4cf3  Withdrawable.sol`<br />
 
 **Flatten contract**<br>
-`# Swarm Source: bzzr://971257ac6d1a00f0a1fab959d4564bbe517e87f0e12b66c4b9795e185e775185`<br/>
+`# Swarm Source: bzzr://to_be_updated`<br/>
 `$ sha256sum build/flatten/CtdToken.sol` <br/>
-`60fe9963d9caed24f0b45bd8a46a65cdfc5191d6e5197fb27fec08525a9effde`
+`62402e8369ae4577138285a8e053ec460d702801590b421a0de4df037385768e `
 
 **Ropsten:**<br/>
-<a href="https://ropsten.etherscan.io/address/0x46f3d0f7a2bd8b44eefdce89b01cd9b0fda6ccab">0x46f3d0f7a2bd8b44eefdce89b01cd9b0fda6ccab</a>
+<a href="https://ropsten.etherscan.io/address/0x46f3d0f7a2bd8b44eefdce89b01cd9b0fda6ccab">to be updated</a>
+
+**Main Net:**<br/>
+<a href="https://main.etherscan.io/address/">to be updated</a>
+
+### Bug Bounty Program (finished)
+
+Please refer to <a href="https://www.reddit.com/r/ethdev/comments/75x5kb/bug_bountyico_cointed_token_audit_100k_reward/">
+the terms and conditions
+</a>
+and <a>results</a> (to be updated).
+<br/>
 
 #### Setup & Test 
 Please refer to <a href="../doc/README.md">doc/README.md</a>

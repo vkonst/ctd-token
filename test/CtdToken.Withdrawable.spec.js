@@ -165,9 +165,9 @@ contract('CtdToken is Withdrawable', (accounts) => {
                     await checkContractBalance(contractOpeningBalance - amount);
                 });
 
-                it('... should emit Withdraw event', async () => {
+                it('... should emit Withdrawn event', async () => {
                     let event = result.logs[0];
-                    assert.equal(event.event, 'Withdraw');
+                    assert.equal(event.event, 'Withdrawn');
                     assert.equal(event.args.drawer, drawer);
                     assert.equal(event.args.weiAmount.toNumber(), amount);
                 });

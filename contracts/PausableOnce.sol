@@ -50,7 +50,7 @@ contract PausableOnce is Ownable {
 
     /**
      * @dev Throws if called by any account other than the pauseMaster.
-    */
+     */
     modifier onlyPauseMaster() {
         require(msg.sender == pauseMaster);
         _;

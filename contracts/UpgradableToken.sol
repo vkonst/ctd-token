@@ -6,6 +6,12 @@ import './lib/zeppelin-solidity/token/StandardToken.sol';
 import './InterfaceUpgradeAgent.sol';
 
 
+/**
+ * @title UpgradableToken
+ * @dev The UpgradableToken contract provides an option of upgrading the tokens to a new revision.
+ * The "upgradeMaster" may propose the upgrade. Token holders can opt-in amount of tokens to upgrade.
+ */
+
 contract UpgradableToken is StandardToken, Ownable {
 
     using SafeMath for uint256;
@@ -28,7 +34,7 @@ contract UpgradableToken is StandardToken, Ownable {
      * @dev Set the upgrade master.
      * parameter _upgradeMaster Upgrade master
      */
-    function setUpgradeMaster(address _upgradeMaster) onlyOwner public {
+    function setUpgradeMaster(address _upgradeMaster) onlyOwner external {
         require(_upgradeMaster != address(0));
         upgradeMaster = _upgradeMaster;
     }
@@ -56,7 +62,7 @@ contract UpgradableToken is StandardToken, Ownable {
      * @dev Upgrade tokens to the new revision.
      * @param value How many tokens to be upgraded
      */
-    function upgrade(uint256 value) whenUpgradeEnabled public {
+    function upgrade(uint256 value) whenUpgradeEnabled external {
         require(value > 0);
 
         uint256 balance = balances[msg.sender];

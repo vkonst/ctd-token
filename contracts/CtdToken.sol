@@ -39,8 +39,8 @@ contract CtdToken is UpgradableToken, PausableOnce, Withdrawable {
     */
     enum Phases {PreStart, PreIcoA, PreIcoB, MainIco, AfterIco}
 
-    uint64 constant internal PRE_ICO_DURATION = 30 days;
-    uint64 constant internal ICO_DURATION = 82 days;
+    uint64 constant internal PRE_ICO_DURATION = 745 hours;
+    uint64 constant internal ICO_DURATION = 2423 hours + 59 minutes;
     uint64 constant internal RETURN_WEI_PAUSE = 30 days;
 
     // Main ICO rate in CTD(s) per 1 ETH:

@@ -7,8 +7,8 @@ const tokenQtyLimits = {
 
 const durationLimits = {
     // in seconds
-    preIco:  30 * (24 * 3600),
-    mainIco: 82 * (24 * 3600)
+    preIco:  745 * 3600,
+    mainIco: (2423*60 + 59) * 60
 };
 
 const icoPhases = {

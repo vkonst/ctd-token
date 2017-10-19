@@ -108,22 +108,22 @@ Should the owner fail to perform a proper setup before the start of the token sa
 
 **Source code files**<br>
 $ `sha256sum contracts/*.sol`<br />
-`ca0cb450f91344b26c40e67aeffa9ab375844a8bffd05d02a77a55fba4ae9a6c  CtdToken.sol`<br />
+`0bdda1e95de6e0a591e94445f68b50a03bf929fd178ad9e28debe2b46119d15d  CtdToken.sol`<br />
 `f3c312a90c3b4d2c4b19d50c171b54917f083f8d0ae446206dd64233600627dc  InterfaceUpgradeAgent.sol`<br />
 `20458a1a20f5c9b6e03b1d217edae935beff9ae82555074a50abfe86c790b85b  PausableOnce.sol`<br />
 `3e5bb94ddd5f24abbf854df1d4876561369ffef089042b7be0656464d278b5aa  UpgradableToken.sol`<br />
 `3fa42f60fe031c0c7f7d7765d2a1774ff381fe52bff25ed8a96436284c5848a7  Withdrawable.sol`<br />
 
 **Flatten contract**<br>
-`# Swarm Source: bzzr://752576ad1c127e6b34ab720c9c64690e1804a5bc5bfd10b7e543a4a14bd8c224`<br/>
+`# Swarm Source: bzzr://85f0f522b0cd191214e69c73d81f454d02c2d5cf1eb8772d9212a454a8635535`<br/>
 `$ sha256sum build/flatten/CtdToken.sol` <br/>
-`3d26dfbb0834d582339120cb44caff8520e52c9ceac0faa85c0f4b115028eb6a`
+`522affa5988ad76a095be28042af344838f9ba616c270ae7c1f9767df1534618  build/flatten/CtdToken.sol`
 
 **Ropsten:**<br/>
-<a href="https://ropsten.etherscan.io/address/0xb625adf25ce15bb9c1fd9282984e941ccc6d7aa2">0xb625adf25ce15bb9c1fd9282984e941ccc6d7aa2</a>
+<a href="https://ropsten.etherscan.io/address/0x1a95c3863b28917b463fb2ebce49f8aba3b20f80">0x1a95c3863b28917b463fb2ebce49f8aba3b20f80</a>
 
 **Main Net:**<br/>
-<a href="https://main.etherscan.io/address/">to be updated</a>
+<a href="https://main.etherscan.io/address/">to_be_updated</a>
 
 ### Bug Bounty Program (finished)
 

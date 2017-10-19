@@ -11,14 +11,9 @@ module.exports = function(deployer, network) {
 
     let preIcoOpeningTime;
 
-    if (network === "main") {
+    if ((network === "main") || (network === "ropsten")) {
         const Oct19thMidnightCest = 1508450400;
         preIcoOpeningTime = Oct19thMidnightCest;
-
-    } else if (network === "ropsten") {
-        const timeNow = parseInt(new Date() / 1000);
-        const twoDays = 48 * 3600;
-        preIcoOpeningTime = timeNow + twoDays;
 
     } else if (network === "development") {
         const timeNow = parseInt(new Date() / 1000);

@@ -108,16 +108,16 @@ Should the owner fail to perform a proper setup before the start of the token sa
 
 **Source code files**<br>
 $ `sha256sum contracts/*.sol`<br />
-`e06ff9ec2024215d0beda009dcd115ff07469d23ce03c135eb8426ea781fa85f  CtdToken.sol`<br />
+`ca0cb450f91344b26c40e67aeffa9ab375844a8bffd05d02a77a55fba4ae9a6c  CtdToken.sol`<br />
 `f3c312a90c3b4d2c4b19d50c171b54917f083f8d0ae446206dd64233600627dc  InterfaceUpgradeAgent.sol`<br />
 `20458a1a20f5c9b6e03b1d217edae935beff9ae82555074a50abfe86c790b85b  PausableOnce.sol`<br />
 `3e5bb94ddd5f24abbf854df1d4876561369ffef089042b7be0656464d278b5aa  UpgradableToken.sol`<br />
-`478f21798d3877586c37a08c5d459cd51e6a05bfaa749612fc13eda8d7ba4cf3  Withdrawable.sol`<br />
+`3fa42f60fe031c0c7f7d7765d2a1774ff381fe52bff25ed8a96436284c5848a7  Withdrawable.sol`<br />
 
 **Flatten contract**<br>
 `# Swarm Source: bzzr://to_be_updated`<br/>
 `$ sha256sum build/flatten/CtdToken.sol` <br/>
-`62402e8369ae4577138285a8e053ec460d702801590b421a0de4df037385768e `
+`3d26dfbb0834d582339120cb44caff8520e52c9ceac0faa85c0f4b115028eb6a`
 
 **Ropsten:**<br/>
 <a href="https://ropsten.etherscan.io/address/0x46f3d0f7a2bd8b44eefdce89b01cd9b0fda6ccab">to be updated</a>

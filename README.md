@@ -127,11 +127,9 @@ $ `sha256sum contracts/*.sol`<br />
 
 ### Bug Bounty Program (finished)
 
-Please refer to <a href="https://www.reddit.com/r/ethdev/comments/75x5kb/bug_bountyico_cointed_token_audit_100k_reward/">
-the terms and conditions
-</a>
-and <a>results</a> (to be updated).
-<br/>
+**Thank you for contributing.**
+
+More info will be published soon.
 
 #### Setup & Test 
 Please refer to <a href="../doc/README.md">doc/README.md</a>

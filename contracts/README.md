@@ -8,6 +8,6 @@ File| sha256
 
 **Flatten:**
 
-File|Swarm Source
+File| sha256
 ---|---
-<a href="../build/flatten/CtdToken.sol">../build/flatten/CtdToken.sol|`bzzr://85f0f522b0cd191214e69c73d81f454d02c2d5cf1eb8772d9212a454a8635535`</a>
+<a href="../build/flatten/CtdToken.sol">../build/flatten/CtdToken.sol|`522affa5988ad76a095be28042af344838f9ba616c270ae7c1f9767df1534618`</a>

@@ -7,7 +7,7 @@ module.exports = function(deployer, network) {
     const CtdToken = artifacts.require('./CtdToken.sol');
     console.warn("*** CtdToken    .binary.length :" + CtdToken.binary.length);
 
-    const oneEther = 1e+18;
+    const pointNineEther = 9e+17;
 
     let preIcoOpeningTime;
 
@@ -21,5 +21,5 @@ module.exports = function(deployer, network) {
         preIcoOpeningTime = timeNow + threeMinutes;
     }
 
-    deployer.deploy(CtdToken, preIcoOpeningTime, {value: oneEther});
+    deployer.deploy(CtdToken, preIcoOpeningTime, {value: pointNineEther, gas: 2600000});
 };

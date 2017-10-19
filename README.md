@@ -115,15 +115,15 @@ $ `sha256sum contracts/*.sol`<br />
 `3fa42f60fe031c0c7f7d7765d2a1774ff381fe52bff25ed8a96436284c5848a7  Withdrawable.sol`<br />
 
 **Flatten contract**<br>
-`# Swarm Source: bzzr://85f0f522b0cd191214e69c73d81f454d02c2d5cf1eb8772d9212a454a8635535`<br/>
 `$ sha256sum build/flatten/CtdToken.sol` <br/>
-`522affa5988ad76a095be28042af344838f9ba616c270ae7c1f9767df1534618  build/flatten/CtdToken.sol`
+`522affa5988ad76a095be28042af344838f9ba616c270ae7c1f9767df1534618  build/flatten/CtdToken.sol`<br/>
+`# Swarm Source: bzzr://94b10c2a6e6e4ebe96606e48a7611d3da6e223636638da8e85b7391ebe26f52e`<br/>
+
+**Main Net***
+<a href="https://etherscan.io/address/0x230c2a140e758087f7107dd31943c5c03b819e55">0x230c2a140e758087f7107dd31943c5c03b819e55</a>
 
 **Ropsten:**<br/>
 <a href="https://ropsten.etherscan.io/address/0x1a95c3863b28917b463fb2ebce49f8aba3b20f80">0x1a95c3863b28917b463fb2ebce49f8aba3b20f80</a>
-
-**Main Net:**<br/>
-<a href="https://main.etherscan.io/address/">to_be_updated</a>
 
 ### Bug Bounty Program (finished)
 
@@ -135,4 +135,3 @@ and <a>results</a> (to be updated).
 
 #### Setup & Test 
 Please refer to <a href="../doc/README.md">doc/README.md</a>
-

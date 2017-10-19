@@ -183,7 +183,7 @@ contract('CtdToken is PausableOnce', (accounts) => {
             });
 
             it('should NOT throw error if approve() called', async () => {
-                let result = await token.approve.call(owner, 1, {from: buyer});
+                let result = await token.approve.call(owner, 0, {from: buyer});
                 assert(result);
             });
 
@@ -236,7 +236,7 @@ contract('CtdToken is PausableOnce', (accounts) => {
             });
 
             it('should throw error if approve() called', async () => {
-                await expectThrows(token.approve.call(stranger, 1, {from: buyer}));
+                await expectThrows(token.approve.call(stranger, 0, {from: buyer}));
             });
 
             it('should throw error if increaseApproval() called', async () => {
@@ -268,7 +268,7 @@ contract('CtdToken is PausableOnce', (accounts) => {
             });
 
             it('should throw error if approve() called', async () => {
-                await expectThrows(token.approve.call(stranger, 1, {from: owner}));
+                await expectThrows(token.approve.call(stranger, 0, {from: owner}));
             });
 
             it('should throw error if increaseApproval() called', async () => {

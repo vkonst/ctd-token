@@ -50,7 +50,7 @@ contract('CtdToken After ICO Phase', (accounts) => {
         });
 
         it('should NOT throw error if approve() called', async () => {
-            let result = token.approve.call(buyer, 1, {from: owner});
+            let result = token.approve.call(buyer, 0, {from: owner});
             assert(result);
         });
 
@@ -83,7 +83,7 @@ contract('CtdToken After ICO Phase', (accounts) => {
         });
 
         it('should NOT throw error if approve() called', async () => {
-            let result = await token.approve.call(owner, 1, {from: buyer});
+            let result = await token.approve.call(owner, 0, {from: buyer});
             assert(result);
         });
 
@@ -116,7 +116,7 @@ contract('CtdToken After ICO Phase', (accounts) => {
         });
 
         it('should NOT throw error if approve() called', async () => {
-            let result = await token.approve.call(owner, 1, {from: bounty});
+            let result = await token.approve.call(owner, 0, {from: bounty});
             assert(result);
         });
 

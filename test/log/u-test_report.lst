@@ -71,7 +71,7 @@ version: v20171011-0530
   40 passing (1m)
 
   Contract: CtdToken is Withdrawable
-    withdrawal()
+    setWithdrawal()
       ✓ can NOT be called externally
       ✓ should not add balances to null or 0 address
       ✓ should add adding balance to a valid address

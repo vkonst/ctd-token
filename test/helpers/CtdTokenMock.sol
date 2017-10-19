@@ -32,8 +32,8 @@ contract CtdTokenMock is CtdToken {
         return true;
     }
 
-    function testFnWithdrawal(address drawer, uint256 weiAmount) public returns (bool success) {
-        return withdrawal(drawer, weiAmount);
+    function testFnSetWithdrawal(address drawer, uint256 weiAmount) public returns (bool success) {
+        return setWithdrawal(drawer, weiAmount);
     }
 
     function testPendingWithdrawalAmount() public constant returns (uint256 weiAmount) {

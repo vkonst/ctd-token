@@ -23,19 +23,19 @@ contract('CtdToken is Withdrawable', (accounts) => {
         await checkContractBalance();
     });
 
-    describe('withdrawal()', async () => {
+    describe('setWithdrawal()', async () => {
 
         it("can NOT be called externally", async function () {
-            assert.isUndefined(withdrawable.withdrawal);
+            assert.isUndefined(withdrawable.setWithdrawal);
         });
 
         it('should not add balances to null or 0 address', async () => {
             // get function result without updating the network state
-            let resultA = await withdrawable.testFnWithdrawal.call(null, amount);
-            let resultB = await withdrawable.testFnWithdrawal.call(0, amount);
+            let resultA = await withdrawable.testFnSetWithdrawal.call(null, amount);
+            let resultB = await withdrawable.testFnSetWithdrawal.call(0, amount);
             // update the network state
-            await withdrawable.testFnWithdrawal(null, amount);
-            await withdrawable.testFnWithdrawal(0, amount);
+            await withdrawable.testFnSetWithdrawal(null, amount);
+            await withdrawable.testFnSetWithdrawal(0, amount);
             // obtain the updated state
             let actAmountA = await withdrawable.testPendingWithdrawalAmount.call({from: drawer});
             let actAmountB = await withdrawable.testPendingWithdrawalAmount.call({from: stranger});
@@ -48,9 +48,9 @@ contract('CtdToken is Withdrawable', (accounts) => {
 
         it('should add adding balance to a valid address', async () => {
             // get function result without updating the network state
-            let result = await withdrawable.testFnWithdrawal.call(drawer, amount);
+            let result = await withdrawable.testFnSetWithdrawal.call(drawer, amount);
             // update the network state
-            await withdrawable.testFnWithdrawal(drawer, amount);
+            await withdrawable.testFnSetWithdrawal(drawer, amount);
             // obtain the updated state
             let actAmount = await withdrawable.testPendingWithdrawalAmount.call({from: drawer});
 
@@ -60,11 +60,11 @@ contract('CtdToken is Withdrawable', (accounts) => {
 
         it('should add balances to multiple valid addresses', async () => {
             // get function result without updating the network state
-            let resultA = await withdrawable.testFnWithdrawal.call(drawer, amount);
-            let resultB = await withdrawable.testFnWithdrawal.call(stranger, amount);
+            let resultA = await withdrawable.testFnSetWithdrawal.call(drawer, amount);
+            let resultB = await withdrawable.testFnSetWithdrawal.call(stranger, amount);
             // update the network state
-            await withdrawable.testFnWithdrawal(drawer, amount);
-            await withdrawable.testFnWithdrawal(stranger, amount);
+            await withdrawable.testFnSetWithdrawal(drawer, amount);
+            await withdrawable.testFnSetWithdrawal(stranger, amount);
             // obtain the updated state
             let actAmountA = await withdrawable.testPendingWithdrawalAmount.call({from: drawer});
             let actAmountB = await withdrawable.testPendingWithdrawalAmount.call({from: stranger});
@@ -79,7 +79,7 @@ contract('CtdToken is Withdrawable', (accounts) => {
             let result, event;
 
             beforeEach(async () => {
-                result = await withdrawable.testFnWithdrawal(drawer, amount);
+                result = await withdrawable.testFnSetWithdrawal(drawer, amount);
                 assert.lengthOf(result.logs, 1);
                 event = result.logs[0];
                 let actAmount = await withdrawable.testPendingWithdrawalAmount.call({from: drawer});
@@ -93,7 +93,7 @@ contract('CtdToken is Withdrawable', (accounts) => {
             });
 
             it('... should allow adding balance again', async () => {
-                await withdrawable.testFnWithdrawal(drawer, 100);
+                await withdrawable.testFnSetWithdrawal(drawer, 100);
                 let actAmount = await withdrawable.testPendingWithdrawalAmount.call({from: drawer});
                 assert.equal(actAmount.toNumber(), amount + 100);
             });
@@ -122,7 +122,7 @@ contract('CtdToken is Withdrawable', (accounts) => {
             let result, pendingAmount;
 
             beforeEach(async () => {
-                result = await withdrawable.testFnWithdrawal(drawer, amount);
+                result = await withdrawable.testFnSetWithdrawal(drawer, amount);
                 pendingAmount = await withdrawable.testPendingWithdrawalAmount.call({from: drawer});
 
                 assert.equal(pendingAmount.toNumber(), amount);

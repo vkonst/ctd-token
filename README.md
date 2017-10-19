@@ -115,12 +115,12 @@ $ `sha256sum contracts/*.sol`<br />
 `3fa42f60fe031c0c7f7d7765d2a1774ff381fe52bff25ed8a96436284c5848a7  Withdrawable.sol`<br />
 
 **Flatten contract**<br>
-`# Swarm Source: bzzr://to_be_updated`<br/>
+`# Swarm Source: bzzr://752576ad1c127e6b34ab720c9c64690e1804a5bc5bfd10b7e543a4a14bd8c224`<br/>
 `$ sha256sum build/flatten/CtdToken.sol` <br/>
 `3d26dfbb0834d582339120cb44caff8520e52c9ceac0faa85c0f4b115028eb6a`
 
 **Ropsten:**<br/>
-<a href="https://ropsten.etherscan.io/address/0x46f3d0f7a2bd8b44eefdce89b01cd9b0fda6ccab">to be updated</a>
+<a href="https://ropsten.etherscan.io/address/0xb625adf25ce15bb9c1fd9282984e941ccc6d7aa2">0xb625adf25ce15bb9c1fd9282984e941ccc6d7aa2</a>
 
 **Main Net:**<br/>
 <a href="https://main.etherscan.io/address/">to be updated</a>

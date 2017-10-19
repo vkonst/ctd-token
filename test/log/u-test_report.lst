@@ -1,4 +1,4 @@
-version: v20171011-0530
+version: v20171019-0330
 
   Contract: CtdToken is Ownable
     constructor

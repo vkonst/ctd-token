@@ -31,7 +31,7 @@ contract Withdrawable {
      * @param weiAmount The value in Wei allowed to withdraw.
      * @return success
      */
-    function withdrawal(address drawer, uint256 weiAmount) internal returns (bool success) {
+    function setWithdrawal(address drawer, uint256 weiAmount) internal returns (bool success) {
         if ((drawer != address(0)) && (weiAmount > 0)) {
             uint256 oldBalance = pendingWithdrawals[drawer];
             uint256 newBalance = oldBalance + weiAmount;

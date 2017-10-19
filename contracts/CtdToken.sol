@@ -157,7 +157,7 @@ contract CtdToken is UpgradableToken, PausableOnce, Withdrawable {
             totalProceeds = totalProceeds.add(weiToParticipate);
             owner.transfer(weiToParticipate);
             if (overpaidWei > 0) {
-                withdrawal(msg.sender, overpaidWei);
+                setWithdrawal(msg.sender, overpaidWei);
             }
 
             // Logging
@@ -165,7 +165,7 @@ contract CtdToken is UpgradableToken, PausableOnce, Withdrawable {
             NewFunds(msg.sender, weiToParticipate);
 
         } else {
-            withdrawal(msg.sender, msg.value);
+            setWithdrawal(msg.sender, msg.value);
         }
 
         if (phase != oldPhase) {
@@ -263,7 +263,7 @@ contract CtdToken is UpgradableToken, PausableOnce, Withdrawable {
             returnAllowedTime = uint64(now + RETURN_WEI_PAUSE);
         }
 
-        withdrawal(msg.sender, shiftAward);
+        setWithdrawal(msg.sender, shiftAward);
         NewPhase(phase);
     }
 
@@ -294,6 +294,7 @@ contract CtdToken is UpgradableToken, PausableOnce, Withdrawable {
 
     /**
      * @dev Approve the specified address to spend the specified amount of tokens on behalf of the msg.sender.
+     * Use "increaseApproval" or "decreaseApproval" function to change the approval, if needed.
      * @param _spender The address which will spend the funds.
      * @param _value The amount of tokens to be spent.
      * @return success/failure

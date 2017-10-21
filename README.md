@@ -127,9 +127,10 @@ $ `sha256sum contracts/*.sol`<br />
 
 ### Bug Bounty Program (finished)
 
-**Thank you for contributing.**
+Results of the Cointed Token (CTD) Bug Bounty Program can be found
+<a href="https://github.com/vkonst/ctd-token/issues/11">here</a>.
 
-More info will be published soon.
+**Thank you for contributing.**
 
 #### Setup & Test 
 Please refer to <a href="../doc/README.md">doc/README.md</a>
